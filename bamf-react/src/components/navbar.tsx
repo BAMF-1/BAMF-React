@@ -1,8 +1,9 @@
 "use client";
 import { useState } from "react";
+import LoginButton from "./LoginButton";
+import CartButton from "./CartButton";
 
 export default function Navbar() {
-    const [cartCount] = useState(6);
     const [isMenuOpen, setIsMenuOpen] = useState(false);
 
     return (
@@ -51,33 +52,10 @@ export default function Navbar() {
 
                     {/* Cart Button & Mobile Menu Toggle */}
                     <div className="flex items-center gap-4">
-                        {/* Enhanced Cart Button */}
-                        <button className="relative px-5 py-2.5 text-sm font-bold text-white border-2 transition-all duration-300 hover:scale-105 hover:cursor-pointer active:scale-95 group"
-                            style={{
-                                borderColor: "#362222",
-                                backgroundColor: "#2B2B2B"
-                            }}
-                            onMouseEnter={(e) => {
-                                e.currentTarget.style.backgroundColor = "#362222";
-                                e.currentTarget.style.borderColor = "#8B4545";
-                            }}
-                            onMouseLeave={(e) => {
-                                e.currentTarget.style.backgroundColor = "#2B2B2B";
-                                e.currentTarget.style.borderColor = "#362222";
-                            }}>
-                            <span className="relative z-10 flex items-center gap-2">
-                                🛒
-                                <span className="tracking-wider">CART</span>
-                            </span>
-                            {cartCount > 0 && (
-                                <span className="absolute -top-2 -right-2 w-6 h-6 flex items-center justify-center text-xs font-bold text-white rounded-full animate-pulse"
-                                    style={{ backgroundColor: "#8B4545" }}>
-                                    {cartCount}
-                                </span>
-                            )}
-                            <span className="absolute inset-0 w-0 transition-all duration-300 group-hover:w-full"
-                                style={{ backgroundColor: "rgba(139, 69, 69, 0.2)" }}></span>
-                        </button>
+                        <div className="not-sm:hidden gap-4 flex">
+                            <CartButton />
+                            <LoginButton />
+                        </div>
 
                         {/* Mobile Menu Button */}
                         <button
@@ -111,6 +89,13 @@ export default function Navbar() {
                         <a href="#contact" className="block text-gray-300 hover:text-white transition-colors py-2">
                             CONTACT
                         </a>
+                        <div className="pt-4 border-t flex justify-center"
+                            style={{ borderColor: "#362222" }}>
+                            <LoginButton />
+                        </div>
+                        <div className="flex justify-center mt-4">
+                            <CartButton />
+                        </div>
                     </div>
                 )}
             </div>

@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import Navbar from "@/components/navbar";
-import Footer from "@/components/footer";
+import Navbar from "@/components/Navbar";
+import Footer from "@/components/Footer";
 // @ts-ignore: Allow side-effect import of global CSS without module declarations
 import "./globals.css";
 
@@ -31,6 +31,7 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
         style={{ backgroundColor: "#171010" }}
       >
+        <div id="blurOverlay" className="fixed w-full h-full backdrop-blur-sm z-25 hidden" />
         <Navbar />
         {children}
         <Footer />
