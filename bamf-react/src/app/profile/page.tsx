@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import ProfileHeader from "@/components/Profile/ProfileHeader";
 import AccountSettings from "@/components/Profile/AccountSettings";
@@ -7,8 +7,16 @@ import DangerZone from "@/components/Profile/DangerZone";
 import OrderHistory from "@/components/Profile/OrderHistory";
 
 const ProfilePage = () => {
-  const { isAuthenticated } = useAuth();
-  const [email, setEmail] = useState("john.doe@example.com");
+  const { isAuthenticated, user } = useAuth();
+  const [email, setEmail] = useState(user?.email || "");
+
+  // Update email when user data changes
+  useEffect(() => {
+    if (user?.email) {
+      setEmail(user.email);
+    }
+  }, [user?.email]);
+
   const [orderHistory] = useState([
     {
       id: "ORD-2024-001",
