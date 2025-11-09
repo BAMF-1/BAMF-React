@@ -149,6 +149,13 @@ export default function UsersManagement() {
                         onChange={(val) => setFormData({ ...formData, email: val })}
                         required
                     />
+                    <FormField
+                        label="NewPassword"
+                        name="newPassword"
+                        value={(formData as any).newPassword || ''}
+                        onChange={(val) => setFormData({ ...formData, newPassword: val })}
+                        placeholder="New password (leave blank to keep current password)"
+                    />
                 </FormWrapper>
             )}
         />
