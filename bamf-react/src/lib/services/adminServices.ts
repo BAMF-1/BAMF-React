@@ -22,6 +22,7 @@ export interface Review {
     title: string;
     comment: string;
     createdUtc: string;
+    updatedUtc?: string;
 }
 
 export interface Item {
@@ -110,9 +111,14 @@ export const reviewService = {
     getByProduct: (productId: number) =>
         apiClient.get<Review[]>(`/api/Reviews/product/${productId}`),
     create: (productId: number, rating: number, title: string, comment: string) =>
-        apiClient.post<Review>(`/api/Reviews?productId=${productId}&rating=${rating}&title=${encodeURIComponent(title)}&comment=${encodeURIComponent(comment)}`),
-    update: (id: number, rating: number, title: string, comment: string) =>
-        apiClient.put<Review>(`/api/Reviews/${id}?rating=${rating}&title=${encodeURIComponent(title)}&comment=${encodeURIComponent(comment)}`),
+        apiClient.post<Review>(`/api/Reviews`, { productId, rating, title, comment }),
+    update: (id: number, rating?: number, title?: string, comment?: string) => {
+        const body: { rating?: number; title?: string; comment?: string } = {};
+        if (rating !== undefined) body.rating = rating;
+        if (title !== undefined) body.title = title;
+        if (comment !== undefined) body.comment = comment;
+        return apiClient.put<Review>(`/api/Reviews/${id}`, body);
+    },
     delete: (id: number) => apiClient.delete(`/api/Reviews/${id}`),
 };
 
