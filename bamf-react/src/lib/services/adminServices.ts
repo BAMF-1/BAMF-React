@@ -97,8 +97,8 @@ export const userService = {
     getAll: (page: number = 1) => apiClient.get<User[]>(`/api/UserManagement?page=${page}`),
     getAllCount: () => apiClient.get<number>('/api/UserManagement/count'),
     getById: (id: number) => apiClient.get<User>(`/api/UserManagement/${id}`),
-    update: (id: number, name: string, email: string) =>
-        apiClient.put<User>(`/api/UserManagement/${id}?name=${encodeURIComponent(name)}&email=${encodeURIComponent(email)}`),
+    update: (id: number, email: string) =>
+        apiClient.put<User>(`/api/UserManagement/${id}`, { email }),
     delete: (id: number) => apiClient.delete(`/api/UserManagement/${id}`),
 };
 
