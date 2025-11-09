@@ -23,7 +23,7 @@ export function AdminLoginForm() {
             if (!result.success) {
                 setError(result.error || "Login failed");
             } else {
-                router.push("/admin");
+                // Redirect handled inside adminLogin; no need to push here.
             }
         } catch (err: any) {
             setError(err.message || "An unexpected error occurred");

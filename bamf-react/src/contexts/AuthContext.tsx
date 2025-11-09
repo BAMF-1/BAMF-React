@@ -92,7 +92,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
             setUser(response.data as UserFromToken);
             setShowLoginPopup(false);
-            router.push('/admin/dashboard');
+            // Navigate to the admin dashboard root (existing route)
+            router.push('/admin');
             return { success: true };
         } catch (error: any) {
             return { success: false, error: error.message || 'Admin login failed' };
@@ -160,7 +161,12 @@ export function withAuth<P extends object>(
         useEffect(() => {
             if (!isLoading) {
                 if (!isAuthenticated) {
-                    setShowLoginPopup(true);
+                    // For admin-protected routes, redirect to dedicated admin login
+                    if (requireAdmin) {
+                        router.push('/admin/login');
+                    } else {
+                        setShowLoginPopup(true);
+                    }
                 } else if (requireAdmin && !isAdmin) {
                     router.push('/');
                 }
