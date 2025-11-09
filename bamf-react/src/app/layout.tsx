@@ -5,6 +5,7 @@ import Footer from "@/components/Footer";
 // @ts-ignore: Allow side-effect import of global CSS without module declarations
 import "./globals.css";
 import { AuthProvider } from "@/contexts/AuthContext";
+import { Bounce, ToastContainer } from "react-toastify";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -37,6 +38,19 @@ export default function RootLayout({
           <Navbar />
           {children}
           <Footer />
+          <ToastContainer
+            position="top-left"
+            autoClose={5000}
+            hideProgressBar={false}
+            newestOnTop={false}
+            closeOnClick={false}
+            rtl={false}
+            pauseOnFocusLoss
+            draggable
+            pauseOnHover
+            theme="light"
+            transition={Bounce}
+          />
         </AuthProvider>
       </body>
     </html>

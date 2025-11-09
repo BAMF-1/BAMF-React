@@ -3,7 +3,7 @@ import React, { useEffect } from "react";
 type FullScreenPopupProps = {
     open: boolean;
     onClose: () => void;
-    childSize: ChildSize;
+    childSize?: ChildSize; // made optional (defaults applied in component)
     children?: React.ReactNode;
 };
 
