@@ -82,12 +82,17 @@ export default function UsersManagement() {
 
     const handleDelete = async (id: number | string) => {
         try {
-            await userService.delete(Number(id));
+            const response = await userService.delete(Number(id));
+            if (response.error) {
+                toast.error(`Failed to delete user: ${response.error}`);
+                return;
+            }
             setUsers(users.filter(u => u.id !== id));
+            setTotalCount(prev => prev - 1);
             toast.success('User deleted successfully.');
-        } catch (error) {
+        } catch (error: any) {
             console.error('Error deleting user:', error);
-            toast.error('Failed to delete user');
+            toast.error(error?.message || 'Failed to delete user');
         }
     };
 
@@ -106,14 +111,18 @@ export default function UsersManagement() {
                 toast.error('Email is required.');
                 return;
             }
-            await userService.update(item.id, email);
+            const response = await userService.update(item.id, email);
+            if (response.error) {
+                toast.error(`Failed to update user: ${response.error}`);
+                return;
+            }
             toast.success('User updated successfully.');
             await loadUsers();
             onClose();
             setFormData({});
-        } catch (error) {
+        } catch (error: any) {
             console.error('Error saving user:', error);
-            toast.error('Failed to save user');
+            toast.error(error?.message || 'Failed to save user');
         }
     };
 

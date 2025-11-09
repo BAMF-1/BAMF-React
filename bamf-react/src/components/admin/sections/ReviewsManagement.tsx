@@ -7,6 +7,7 @@ import { BaseCRUDComponent, Column } from '../BaseCRUDComponent';
 import { FormWrapper, FormField } from '../FormWrapper';
 import { reviewService, Review } from '@/lib/services/adminServices';
 import { Star } from 'lucide-react';
+import { toast } from 'react-toastify';
 
 export default function ReviewsManagement() {
     const [reviews, setReviews] = useState<Review[]>([]);
@@ -58,11 +59,17 @@ export default function ReviewsManagement() {
 
     const handleDelete = async (id: number | string) => {
         try {
-            await reviewService.delete(Number(id));
+            const response = await reviewService.delete(Number(id));
+            if (response.error) {
+                toast.error(`Failed to delete review: ${response.error}`);
+                return;
+            }
             setReviews(reviews.filter(r => r.id !== id));
-        } catch (error) {
+            setTotalCount(prev => prev - 1);
+            toast.success('Review deleted successfully');
+        } catch (error: any) {
             console.error('Error deleting review:', error);
-            alert('Failed to delete review');
+            toast.error(error?.message || 'Failed to delete review');
         }
     };
 
@@ -75,21 +82,31 @@ export default function ReviewsManagement() {
             const { productId, rating, title, comment } = formData;
 
             if (!rating || !title || !comment || (!item?.id && !productId)) {
-                alert('Product ID (for new), Rating, Title, and Comment are required.');
+                toast.error('Product ID (for new), Rating, Title, and Comment are required.');
                 return;
             }
 
             if (item?.id) {
-                await reviewService.update(item.id, rating as number, title as string, comment as string);
+                const response = await reviewService.update(item.id, rating as number, title as string, comment as string);
+                if (response.error) {
+                    toast.error(`Failed to update review: ${response.error}`);
+                    return;
+                }
+                toast.success('Review updated successfully');
             } else {
-                await reviewService.create(productId as number, rating as number, title as string, comment as string);
+                const response = await reviewService.create(productId as number, rating as number, title as string, comment as string);
+                if (response.error) {
+                    toast.error(`Failed to create review: ${response.error}`);
+                    return;
+                }
+                toast.success('Review created successfully');
             }
             await loadReviews();
             onClose();
             setFormData({});
-        } catch (error) {
+        } catch (error: any) {
             console.error('Error saving review:', error);
-            alert('Failed to save review');
+            toast.error(error?.message || 'Failed to save review');
         }
     };
 

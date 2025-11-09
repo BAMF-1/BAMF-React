@@ -3,7 +3,7 @@
 // ============================================
 "use client";
 import { ReactNode, useState, Fragment } from 'react';
-import { Trash2, Edit, Plus, Search, X, ChevronDown, ChevronRight } from 'lucide-react';
+import { Trash2, Edit, Plus, Search, X, ChevronDown, ChevronRight, ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';
 import FullScreenPopup from '../Popups/FullScreenPopup';
 import React from 'react';
 
@@ -14,6 +14,8 @@ export interface Column<T> {
     sortable?: boolean;
     searchable?: boolean;
 }
+
+type SortDirection = 'asc' | 'desc' | null;
 
 export interface BaseCRUDProps<T extends { id: number | string }> {
     data: { items: T[]; totalCount: number };
@@ -68,6 +70,8 @@ export function BaseCRUDComponent<T extends { id: number | string }>({
     const [deletingItem, setDeletingItem] = useState<T | null>(null);
     const [isDeleteOpen, setIsDeleteOpen] = useState(false);
     const [expandedRows, setExpandedRows] = useState<Set<number | string>>(new Set());
+    const [sortColumn, setSortColumn] = useState<string | null>(null);
+    const [sortDirection, setSortDirection] = useState<SortDirection>(null);
 
     const items = data.items;
     const totalCount = data.totalCount;
@@ -92,6 +96,51 @@ export function BaseCRUDComponent<T extends { id: number | string }>({
         }
     };
 
+    const handleSort = (columnKey: string) => {
+        if (sortColumn === columnKey) {
+            // Cycle through: asc -> desc -> null
+            if (sortDirection === 'asc') {
+                setSortDirection('desc');
+            } else if (sortDirection === 'desc') {
+                setSortDirection(null);
+                setSortColumn(null);
+            }
+        } else {
+            setSortColumn(columnKey);
+            setSortDirection('asc');
+        }
+    };
+
+    const getSortValue = (item: T, columnKey: string): any => {
+        const value = item[columnKey as keyof T];
+
+        // Handle null/undefined
+        if (value === null || value === undefined) return '';
+
+        // Handle numbers
+        if (typeof value === 'number') return value;
+
+        // Handle booleans
+        if (typeof value === 'boolean') return value ? 1 : 0;
+
+        // Handle dates (check if string looks like a date)
+        if (typeof value === 'string') {
+            const dateValue = new Date(value);
+            if (!isNaN(dateValue.getTime()) && value.match(/^\d{4}-\d{2}-\d{2}/)) {
+                return dateValue.getTime();
+            }
+            return value.toLowerCase();
+        }
+
+        // Handle objects/arrays - convert to string for sorting
+        if (typeof value === 'object') {
+            if (Array.isArray(value)) return value.length;
+            return JSON.stringify(value).toLowerCase();
+        }
+
+        return String(value).toLowerCase();
+    };
+
     const filteredData = items.filter(item => {
         if (!searchTerm) return true;
 
@@ -102,6 +151,19 @@ export function BaseCRUDComponent<T extends { id: number | string }>({
             return String(value).toLowerCase().includes(searchLower);
         });
     });
+
+    // Apply sorting
+    const sortedData = sortColumn && sortDirection
+        ? [...filteredData].sort((a, b) => {
+            const aValue = getSortValue(a, sortColumn);
+            const bValue = getSortValue(b, sortColumn);
+
+            if (aValue === bValue) return 0;
+
+            const comparison = aValue < bValue ? -1 : 1;
+            return sortDirection === 'asc' ? comparison : -comparison;
+        })
+        : filteredData;
 
     const toggleRowExpansion = (id: number | string) => {
         setExpandedRows(prev => {
@@ -309,11 +371,35 @@ export function BaseCRUDComponent<T extends { id: number | string }>({
                         <thead>
                             <tr className="bg-[#3a3a3a] border-b border-[#4a4a4a]">
                                 <th className="px-6 py-4 w-8"></th>
-                                {columns.map(column => (
-                                    <th key={String(column.key)} className="px-6 py-4 text-left text-xs font-semibold text-gray-300 uppercase tracking-wider">
-                                        {column.label}
-                                    </th>
-                                ))}
+                                {columns.map(column => {
+                                    const isSortable = column.sortable !== false;
+                                    const isSorted = sortColumn === String(column.key);
+
+                                    return (
+                                        <th
+                                            key={String(column.key)}
+                                            className={`px-6 py-4 text-left text-xs font-semibold text-gray-300 uppercase tracking-wider ${isSortable ? 'cursor-pointer select-none hover:bg-[#4a4a4a] transition-colors' : ''}`}
+                                            onClick={() => isSortable && handleSort(String(column.key))}
+                                        >
+                                            <div className="flex items-center gap-2">
+                                                <span>{column.label}</span>
+                                                {isSortable && (
+                                                    <span className="text-gray-500">
+                                                        {isSorted ? (
+                                                            sortDirection === 'asc' ? (
+                                                                <ArrowUp className="w-4 h-4 text-blue-400" />
+                                                            ) : (
+                                                                <ArrowDown className="w-4 h-4 text-blue-400" />
+                                                            )
+                                                        ) : (
+                                                            <ArrowUpDown className="w-4 h-4" />
+                                                        )}
+                                                    </span>
+                                                )}
+                                            </div>
+                                        </th>
+                                    );
+                                })}
                                 {(allowEdit || allowDelete || customActions) && (
                                     <th className="px-6 py-4 text-right text-xs font-semibold text-gray-300 uppercase tracking-wider">
                                         Actions
@@ -322,14 +408,14 @@ export function BaseCRUDComponent<T extends { id: number | string }>({
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-[#3a3a3a]">
-                            {filteredData.length === 0 ? (
+                            {sortedData.length === 0 ? (
                                 <tr>
                                     <td colSpan={columns.length + 2} className="px-6 py-12 text-center text-gray-400">
                                         No data found
                                     </td>
                                 </tr>
                             ) : (
-                                filteredData.map((item) => {
+                                sortedData.map((item) => {
                                     const isExpanded = expandedRows.has(item.id);
                                     const canExpand = hasExpandableData(item);
 
@@ -408,7 +494,12 @@ export function BaseCRUDComponent<T extends { id: number | string }>({
             {/* Stats */}
             <div className="flex gap-4 text-sm text-gray-400">
                 <span>Total: {totalCount} items</span>
-                <span>Showing: {filteredData.length} items</span>
+                <span>Showing: {sortedData.length} items</span>
+                {sortColumn && sortDirection && (
+                    <span className="text-blue-400">
+                        Sorted by: {columns.find(c => String(c.key) === sortColumn)?.label} ({sortDirection === 'asc' ? '↑' : '↓'})
+                    </span>
+                )}
             </div>
 
             {/* Load More Button */}

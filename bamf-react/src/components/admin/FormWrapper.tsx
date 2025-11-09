@@ -62,6 +62,7 @@ interface FormFieldProps {
     disabled?: boolean;
     options?: { value: any; label: string }[];
     rows?: number;
+    hideEmptyOption?: boolean;
 }
 
 export function FormField({
@@ -75,6 +76,7 @@ export function FormField({
     disabled = false,
     options,
     rows,
+    hideEmptyOption = false,
 }: FormFieldProps) {
     const inputClasses = "w-full px-4 py-2 bg-[#1f1f1f] border border-[#3a3a3a] rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-[#5a4a4a] transition disabled:opacity-50 disabled:cursor-not-allowed";
 
@@ -86,13 +88,13 @@ export function FormField({
             {type === 'select' && options ? (
                 <select
                     name={name}
-                    value={value || ''}
+                    value={value ?? ''}
                     onChange={(e) => onChange?.(e.target.value)}
                     className={inputClasses}
                     disabled={disabled}
                     required={required}
                 >
-                    <option value="">Select {label}</option>
+                    {!hideEmptyOption && <option value="">Select {label}</option>}
                     {options.map((opt) => (
                         <option key={opt.value} value={opt.value}>
                             {opt.label}
