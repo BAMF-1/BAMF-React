@@ -17,15 +17,18 @@ export default function ProductCard({
       ? `$${product.minPrice.toFixed(2)}`
       : `From $${product.minPrice.toFixed(2)}`;
 
-  // Only use groupSlug – fallback to groupId removed to prevent 404
-  if (!product.groupSlug) {
-    console.warn('Product missing groupSlug:', product);
-    return null; // Skip rendering broken products
+  // CRITICAL FIX: Use groupSlug (or fallback to groupId), NOT sampleSku!
+  const productIdentifier = product.groupSlug || product.groupId;
+  
+  if (!productIdentifier) {
+    console.warn(' Product missing both groupSlug and groupId:', product);
+    return null;
   }
 
-const href = `/shop/${encodeURIComponent(categorySlug)}/${encodeURIComponent(
-  product.groupSlug || product.groupId
-)}${product.sampleSku ? `?sku=${encodeURIComponent(product.sampleSku)}` : ''}`;
+  // Build the correct URL: /shop/{category}/{GROUP_IDENTIFIER}?sku={variant}
+  const href = `/shop/${encodeURIComponent(categorySlug)}/${encodeURIComponent(
+    productIdentifier
+  )}${product.sampleSku ? `?sku=${encodeURIComponent(product.sampleSku)}` : ''}`;
 
   return (
     <Link

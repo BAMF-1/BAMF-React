@@ -8,7 +8,9 @@ export type Category = {
 export type VariantListItem = {
   sku: string;
   groupId?: string | null;
-  groupSlug?: string | null;
+  groupSlug?: string | null;  // Change this
+  slug?: string | null;        //  Add this (backend returns "slug")
+  objectId?: string | null;    // Add this
   groupName: string;
   price: number;
   inStock: boolean;
@@ -48,6 +50,8 @@ export type GroupedProductCard = {
 export type GroupDetail = {
   groupId: string;
   groupSlug?: string | null;
+  objectId?: string;  // Add this
+  slug?: string;      // Add this
   name: string;
   mainCategory: string;
   heroImageUrl?: string | null;
@@ -55,7 +59,7 @@ export type GroupDetail = {
   maxPrice: number;
   inStockAny: boolean;
   variants: Array<{
-    id: string;
+    id?: string;
     sku: string;
     color?: string | null;
     size?: string | null;
@@ -64,7 +68,13 @@ export type GroupDetail = {
     primaryImageUrl?: string | null;
   }>;
   facets: {
-    colors: Array<{ value: string; count: number }>;
-    sizes: Array<{ value: string; count: number }>;
+    colors?: Array<{ value: string; count: number }>;  // Change from facets.colors
+    sizes?: Array<{ value: string; count: number }>;   // Change from facets.sizes
+    priceFacet?: { globalMin: number; globalMax: number };
   };
+
+page?: number;
+  pageSize?: number;
+  totalVariants?: number;
+  totalPages?: number;
 };

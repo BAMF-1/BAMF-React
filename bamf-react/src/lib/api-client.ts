@@ -22,6 +22,8 @@ export type VariantListItem = {
   size?: string | null;
   primaryImageUrl?: string | null;
   moreVariantsCount?: number;
+  slug?: string | null;
+  objectId?: string | null;
 };
 
 export type GroupedProductCard = {
@@ -499,28 +501,51 @@ export async function fetchCategoryListing(
 // lib/api-client.ts
 export async function fetchGroupDetail(slugOrId: string, sku?: string): Promise<GroupDetail> {
   const query = sku ? `?sku=${encodeURIComponent(sku)}` : '';
-  return requestJSON<GroupDetail>(`/api/groups/${encodeURIComponent(slugOrId)}${query}`);
+  const raw = await requestJSON<any>(`/api/groups/${encodeURIComponent(slugOrId)}${query}`);
+  
+  // Transform backend response to match GroupDetail type
+  return {
+    groupId: raw.objectId,
+    groupSlug: raw.slug,
+    name: raw.name,
+    mainCategory: raw.mainCategory,
+    heroImageUrl: raw.heroImageUrl,
+    minPrice: raw.minPrice,
+    maxPrice: raw.maxPrice,
+    inStockAny: raw.inStockAny,
+    variants: (raw.variants || []).map((v: any) => ({
+      id: v.sku,  // Use SKU as id since backend doesn't return id
+      sku: v.sku,
+      color: v.color,
+      size: v.size,
+      price: v.price,
+      inStock: v.inStock,
+      primaryImageUrl: v.primaryImageUrl,
+    })),
+    facets: {
+      colors: raw.colors || [],  // Backend has colors at root, move to facets
+      sizes: raw.sizes || [],    // Backend has sizes at root, move to facets
+    }
+  };
 }
-
 
 /** Group variant rows (listing) into product cards for category grids */
 export function groupVariantsToProducts(rows: VariantListItem[]): GroupedProductCard[] {
   const map = new Map<string, GroupedProductCard & { _min: number; _max: number }>();
 
   for (const r of rows) {
-    // Use groupId, groupSlug, or fallback to groupName as the key
-    const key = r.groupId || r.groupSlug || r.groupName || r.sku;
+    // Use slug (from backend) OR groupSlug OR objectId
+    const key = r.slug || r.groupSlug || r.objectId || r.groupName;
     
-    // Skip items without any valid identifier
     if (!key) {
-      console.warn('Skipping product variant without valid identifier:', r);
+      console.warn('⚠️ Skipping variant without valid group identifier:', r);
       continue;
     }
     
     if (!map.has(key)) {
       map.set(key, {
-        groupId: r.groupId || r.groupSlug || r.sku, // Ensure we always have something
-        groupSlug: r.groupSlug ?? null,
+        groupId: r.objectId ?? null,           // objectId as groupId
+        groupSlug: r.slug ?? r.groupSlug,      // slug from backend
         groupName: r.groupName || 'Unnamed Product',
         primaryImageUrl: r.primaryImageUrl ?? undefined,
         minPrice: r.price,
