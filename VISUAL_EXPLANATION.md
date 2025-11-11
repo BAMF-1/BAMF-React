@@ -107,6 +107,43 @@ git push origin Alex-Jakob-MQ-v2
 
 **Result:** Same changes, but as new commits that Git hasn't "seen" before!
 
+## Solution 3: Reset dev to Before Merge
+
+```
+                    dev branch                  
+                        |                            
+                        |                            
+    [Current state]     ●  17c497a (revert)
+                        |
+                        ●  5cdf1c22 (merge)
+                        |
+                        ●  0dbf3d22 (before merge)
+                        |
+                        
+    [NEW: Revert both]  
+                        |
+                        ●  NEW: Revert 17c497a AND 5cdf1c22
+                        |  ✅ Back to before merge!
+                        |
+                    (clean slate)
+                    
+    Alex-Jakob-MQ       ●  67738579
+    branch keeps            (unchanged, ready for
+    its changes             manual merge later)
+```
+
+**Commands:**
+```bash
+git checkout dev
+git revert --no-commit 17c497a075432ada77bb50a67e1ac359e9bf6ee5
+git revert --no-commit 5cdf1c22909ab672fee8930f70c68ec19c01c31e
+git commit -m "Reset dev to state before Alex-Jakob-MQ merge"
+git push origin dev
+# Later: merge Alex-Jakob-MQ manually when ready
+```
+
+**Result:** dev goes back to the state before the merge, Alex-Jakob-MQ keeps changes for manual review/merge later!
+
 ## Why Did This Happen?
 
 ```
@@ -138,5 +175,6 @@ What happened here:
 |--------------|------------|---------|
 | All changes back, quick fix | Revert the revert | `git revert 17c497a` |
 | Fresh commits, more control | Cherry-pick to new branch | `git cherry-pick 67738579` |
+| Clean slate, manual merge later | Reset dev to before merge | `git revert --no-commit 17c497a && git revert --no-commit 5cdf1c2` |
 | Just understand the problem | Read the guides | See MERGE_REVERT_ISSUE_GUIDE.md |
 | Interactive help | Run the script | `./resolve-merge-revert.sh` |

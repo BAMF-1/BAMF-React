@@ -64,16 +64,21 @@ echo "   - Create fresh commits with the same changes"
 echo "   - More control over which changes to include"
 echo "   - Executes: git cherry-pick 67738579a84f5c0b4100210dbcdeebc14548e03a"
 echo ""
-echo "3) Show Analysis Only"
+echo "3) Reset dev to Before Merge (Clean Slate)"
+echo "   - Undoes both merge and revert from dev"
+echo "   - Alex-Jakob-MQ keeps changes for manual merge later"
+echo "   - Executes: git revert --no-commit 17c497a + 5cdf1c2"
+echo ""
+echo "4) Show Analysis Only"
 echo "   - Don't make any changes"
 echo "   - Just show the current state and what would happen"
 echo ""
-echo "4) Exit"
+echo "5) Exit"
 echo "   - Exit without making changes"
 echo ""
 
 # Get user choice
-read -p "Enter your choice (1-4): " choice
+read -p "Enter your choice (1-5): " choice
 
 case $choice in
     1)
@@ -157,7 +162,57 @@ case $choice in
         ;;
         
     3)
-        print_info "Option 3: Analysis Only"
+        print_info "Option 3: Reset dev to Before Merge (Clean Slate)"
+        echo ""
+        
+        # Safety check
+        current_branch=$(git branch --show-current)
+        if [ "$current_branch" != "dev" ]; then
+            print_warning "You are not on the 'dev' branch (current: $current_branch)"
+            read -p "Do you want to switch to dev? (y/n): " switch_branch
+            if [ "$switch_branch" = "y" ] || [ "$switch_branch" = "Y" ]; then
+                print_info "Switching to dev branch..."
+                git checkout dev
+                git pull origin dev
+            else
+                print_error "Aborted. Please switch to dev branch manually."
+                exit 1
+            fi
+        fi
+        
+        print_warning "This will reset dev to the state before Alex-Jakob-MQ was merged"
+        print_warning "Both the merge (5cdf1c2) and revert (17c497a) will be undone"
+        print_info "Alex-Jakob-MQ branch will keep its changes for manual merge later"
+        echo ""
+        read -p "Are you sure you want to continue? (y/n): " confirm
+        
+        if [ "$confirm" = "y" ] || [ "$confirm" = "Y" ]; then
+            print_info "Reverting both commits to reset dev..."
+            
+            # Revert both commits in one go
+            if git revert --no-commit 17c497a075432ada77bb50a67e1ac359e9bf6ee5 && \
+               git revert --no-commit 5cdf1c22909ab672fee8930f70c68ec19c01c31e; then
+                git commit -m "Reset dev to state before Alex-Jakob-MQ merge"
+                
+                print_info "✓ Reset completed successfully!"
+                print_info "Next steps:"
+                echo "  1. Review the changes: git diff HEAD~1"
+                echo "  2. If satisfied, push: git push origin dev"
+                echo "  3. Later, merge Alex-Jakob-MQ manually when ready"
+                echo "  4. Or if you want to undo: git reset --hard HEAD~1"
+            else
+                print_error "Revert failed. There may be conflicts to resolve."
+                print_info "After resolving conflicts:"
+                echo "  1. git add <resolved-files>"
+                echo "  2. git commit -m 'Reset dev to state before Alex-Jakob-MQ merge'"
+            fi
+        else
+            print_warning "Aborted by user"
+        fi
+        ;;
+        
+    4)
+        print_info "Option 4: Analysis Only"
         echo ""
         
         print_info "Current Repository State:"
@@ -191,7 +246,7 @@ case $choice in
         print_info "Analysis complete. No changes were made."
         ;;
         
-    4)
+    5)
         print_info "Exiting without changes"
         exit 0
         ;;

@@ -99,9 +99,9 @@ git push origin dev
 
 ### If you're new to this issue:
 1. Read VISUAL_EXPLANATION.md (understand the problem)
-2. Run `./resolve-merge-revert.sh` with option 3 (see the analysis)
+2. Run `./resolve-merge-revert.sh` with option 4 (see the analysis)
 3. Read MERGE_REVERT_ISSUE_GUIDE.md (learn the details)
-4. Run `./resolve-merge-revert.sh` with option 1 (execute the fix)
+4. Run `./resolve-merge-revert.sh` with option 1, 2, or 3 (execute the fix)
 
 ### If you're experienced with Git:
 1. Read QUICK_REFERENCE.md (get the command)
@@ -111,7 +111,7 @@ git push origin dev
 ### If you want to teach others:
 1. Share VISUAL_EXPLANATION.md (easiest to understand)
 2. Reference MERGE_REVERT_ISSUE_GUIDE.md (comprehensive resource)
-3. Show them `./resolve-merge-revert.sh` option 3 (interactive learning)
+3. Show them `./resolve-merge-revert.sh` option 4 (interactive learning)
 
 ## ✅ Recommended Solution
 
@@ -146,7 +146,23 @@ git push origin Alex-Jakob-MQ-v2
 - Prefer a new PR review process
 - Want to rename commits
 
-### Solution 3: Use the Script (if you want guidance)
+### Solution 3: Reset dev to Before Merge (if you want a clean slate)
+```bash
+git checkout dev
+git revert --no-commit 17c497a075432ada77bb50a67e1ac359e9bf6ee5
+git revert --no-commit 5cdf1c22909ab672fee8930f70c68ec19c01c31e
+git commit -m "Reset dev to state before Alex-Jakob-MQ merge"
+git push origin dev
+# Alex-Jakob-MQ keeps its changes for manual merge later
+```
+
+**When to use:**
+- Want dev to go back to before the merge
+- Want to review and merge changes manually later
+- Need a clean slate to restart the merge process
+- Alex-Jakob-MQ branch keeps all its changes intact
+
+### Solution 4: Use the Script (if you want guidance)
 ```bash
 ./resolve-merge-revert.sh
 # Choose option based on your preference

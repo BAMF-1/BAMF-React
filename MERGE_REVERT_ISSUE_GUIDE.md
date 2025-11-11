@@ -118,6 +118,54 @@ git push origin Alex-Jakob-MQ-re-merge
 - Risk of making mistakes
 - Not recommended for beginners
 
+### Solution 4: Reset dev to Before the Merge (Clean Slate)
+
+If you want to completely undo both the merge AND the revert, returning dev to the state before the original merge happened, while keeping Alex-Jakob-MQ intact for manual review later:
+
+```bash
+# On the dev branch
+git checkout dev
+git pull origin dev
+
+# Create a new commit that reverts BOTH the merge and its revert
+# This effectively returns dev to commit 0dbf3d22 (before PR #2)
+git revert --no-commit 17c497a075432ada77bb50a67e1ac359e9bf6ee5
+git revert --no-commit 5cdf1c22909ab672fee8930f70c68ec19c01c31e
+git commit -m "Reset dev to state before Alex-Jakob-MQ merge"
+
+# Push the changes
+git push origin dev
+```
+
+**Alternative (requires force push - use with caution):**
+```bash
+# Reset dev to the commit before the merge
+git checkout dev
+git reset --hard 0dbf3d22b6a9e8a39cb3ad66158c87c4b197fa71
+git push --force origin dev
+```
+
+**Pros:**
+- Completely removes both the merge and revert from dev's working state
+- Alex-Jakob-MQ branch remains untouched with all its changes
+- Can review and manually merge the changes fresh later
+- Clean slate approach
+
+**Cons:**
+- The revert approach adds two more commits to history
+- Force push approach rewrites history (dangerous for shared branches)
+- Force push requires coordination with team
+- May cause issues for anyone who has pulled the merge/revert commits
+- Not recommended for production/shared branches without team coordination
+
+**When to use:**
+- When you want to completely start over with the merge
+- When you need to review changes more carefully before merging
+- When the original merge was premature or had issues
+- When you prefer a clean dev branch state
+
+**Note:** The Alex-Jakob-MQ branch will keep all its changes and can be merged into dev later when you're ready, requiring a normal merge review process.
+
 ## Recommended Approach
 
 **We recommend Solution 1 (Revert the Revert)** because:

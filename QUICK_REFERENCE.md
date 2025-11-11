@@ -47,6 +47,16 @@ git push origin Alex-Jakob-MQ-v2
 # Then create a new PR
 ```
 
+**Option D: Reset dev to Before the Merge** (Clean slate)
+```bash
+git checkout dev
+git revert --no-commit 17c497a075432ada77bb50a67e1ac359e9bf6ee5
+git revert --no-commit 5cdf1c22909ab672fee8930f70c68ec19c01c31e
+git commit -m "Reset dev to state before Alex-Jakob-MQ merge"
+git push origin dev
+# Alex-Jakob-MQ branch keeps its changes for manual merge later
+```
+
 ## Files in This Repo
 
 - `MERGE_REVERT_ISSUE_GUIDE.md` - Full detailed explanation
