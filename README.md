@@ -5,9 +5,11 @@ The React webbapp for our website BAMF
 
 If you're trying to merge the `Alex-Jakob-MQ` branch into `dev` and seeing "no differences" or "Already up to date", see:
 
-- **Quick Fix**: [QUICK_REFERENCE.md](./QUICK_REFERENCE.md)
-- **Full Guide**: [MERGE_REVERT_ISSUE_GUIDE.md](./MERGE_REVERT_ISSUE_GUIDE.md)
-- **Interactive Tool**: Run `./resolve-merge-revert.sh`
+- **📚 Complete Documentation Index**: [INDEX.md](./INDEX.md) - Start here!
+- **⚡ Quick Fix**: [QUICK_REFERENCE.md](./QUICK_REFERENCE.md)
+- **🎨 Visual Guide**: [VISUAL_EXPLANATION.md](./VISUAL_EXPLANATION.md)
+- **📖 Full Guide**: [MERGE_REVERT_ISSUE_GUIDE.md](./MERGE_REVERT_ISSUE_GUIDE.md)
+- **🛠️ Interactive Tool**: Run `./resolve-merge-revert.sh`
 
 **TL;DR**: Run this command to restore the changes:
 ```bash
