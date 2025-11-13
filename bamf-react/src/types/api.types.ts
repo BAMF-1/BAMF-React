@@ -4,6 +4,8 @@ export interface User {
     id: number;
     email: string;
     cart?: string;
+    currentPassword?: string;
+    newPassword?: string;
 }
 
 export interface Admin {
