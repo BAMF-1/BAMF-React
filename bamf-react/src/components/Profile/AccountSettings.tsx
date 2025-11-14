@@ -1,5 +1,8 @@
 import React, { useState } from "react";
 import { User, Eye, EyeOff } from "lucide-react";
+import { userService } from "@/services/user.service";
+import { useAuth } from "@/contexts/AuthContext";
+import { toast } from "react-toastify";
 
 const AccountSettings = ({
   email,
@@ -8,39 +11,91 @@ const AccountSettings = ({
   email: string;
   setEmail: (v: string) => void;
 }) => {
+  const { refreshUser, login } = useAuth();
   const [isEditingEmail, setIsEditingEmail] = useState(false);
   const [isEditingPassword, setIsEditingPassword] = useState(false);
   const [newEmail, setNewEmail] = useState("");
   const [currentPassword, setCurrentPassword] = useState("");
+  const [currentPasswordForEmail, setCurrentPasswordForEmail] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [showCurrentPassword, setShowCurrentPassword] = useState(false);
+  const [showCurrentPasswordForEmail, setShowCurrentPasswordForEmail] =
+    useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
-  const [emailError, setEmailError] = useState("");
-  const [passwordError, setPasswordError] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleSaveEmail = () => {
+  const handleSaveEmail = async () => {
     if (!newEmail || !newEmail.includes("@")) {
-      setEmailError("Please enter a valid email address");
+      toast.error("Please enter a valid email address");
       return;
     }
+
+    if (!currentPasswordForEmail) {
+      toast.error("Current password is required to change email");
+      return;
+    }
+
+    setIsLoading(true);
+
+    const response = await userService.updateProfile({
+      email: newEmail,
+      currentPassword: currentPasswordForEmail,
+    });
+
+    if (response.error) {
+      toast.error(response.error);
+      setIsLoading(false);
+      return;
+    }
+
+    // Re-login with new email to get updated token, workaround for backend limitations, sorry folks :)
+    const loginResponse = await login(newEmail, currentPasswordForEmail);
+
+    // Handle login failure
+    if (!loginResponse.success) {
+      toast.warning(
+        "Email updated but auto-login failed. Please log in manually with your new email."
+      );
+      setIsLoading(false);
+      return;
+    }
+    toast.success("Email updated successfully!");
     setEmail(newEmail);
     setIsEditingEmail(false);
-    setEmailError("");
+    setCurrentPasswordForEmail("");
+    setIsLoading(false);
   };
 
-  const handleSavePassword = () => {
+  const handleSavePassword = async () => {
     if (!currentPassword) {
-      setPasswordError("Current password is required");
+      toast.error("Current password is required");
       return;
     }
     if (newPassword.length < 8) {
-      setPasswordError("New password must be at least 8 characters");
+      toast.error("New password must be at least 8 characters");
       return;
     }
+
+    setIsLoading(true);
+
+    // Update profile with new password
+    const response = await userService.updateProfile({
+      email: email,
+      currentPassword,
+      newPassword,
+    });
+
+    if (response.error) {
+      toast.error(response.error);
+      setIsLoading(false);
+      return;
+    }
+
+    toast.success("Password updated successfully!");
     setIsEditingPassword(false);
     setCurrentPassword("");
     setNewPassword("");
-    setPasswordError("");
+    setIsLoading(false);
   };
 
   return (
@@ -58,62 +113,93 @@ const AccountSettings = ({
       </div>
 
       <div className="space-y-8">
+        {/* Email Section */}
         <div>
           <label className="block text-sm font-bold text-gray-300 mb-3 uppercase tracking-wide">
             Email Address
           </label>
-          <div className="flex gap-3">
-            <input
-              type="email"
-              value={isEditingEmail ? newEmail : email}
-              onChange={(e) => {
-                setNewEmail(e.target.value);
-                setEmailError("");
-              }}
-              disabled={!isEditingEmail}
-              className={`flex-1 px-5 py-3.5 rounded-lg text-white font-medium focus:outline-none focus:ring-2 focus:ring-[#ff4444] transition-all ${
-                isEditingEmail
-                  ? "bg-[#362222] border-2 border-[#4a3535]"
-                  : "bg-[#423F3E] opacity-70 cursor-not-allowed"
-              }`}
-            />
-            {!isEditingEmail ? (
+          {!isEditingEmail ? (
+            <div className="flex gap-3">
+              <input
+                type="email"
+                value={email}
+                disabled
+                className="flex-1 px-5 py-3.5 rounded-lg text-white font-medium bg-[#423F3E] opacity-70 cursor-not-allowed"
+              />
               <button
                 onClick={() => {
                   setIsEditingEmail(true);
                   setNewEmail(email);
                 }}
-                className="px-8 py-3.5 rounded-lg bg-[#362222] hover:bg-[#4a3535] text-white font-semibold transition-all hover:scale-105 active:scale-95 border border-[#4a3535]"
+                disabled={isLoading}
+                className="px-8 py-3.5 rounded-lg bg-[#362222] hover:bg-[#4a3535] text-white font-semibold transition-all hover:scale-105 active:scale-95 border border-[#4a3535] disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 Edit
               </button>
-            ) : (
-              <>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              <input
+                type="email"
+                value={newEmail}
+                onChange={(e) => setNewEmail(e.target.value)}
+                disabled={isLoading}
+                placeholder="New email address"
+                className="w-full px-5 py-3.5 rounded-lg text-white font-medium bg-[#362222] border-2 border-[#4a3535] focus:outline-none focus:ring-2 focus:ring-[#ff4444] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+              />
+              <div className="relative">
+                <input
+                  type={showCurrentPasswordForEmail ? "text" : "password"}
+                  value={currentPasswordForEmail}
+                  onChange={(e) => setCurrentPasswordForEmail(e.target.value)}
+                  disabled={isLoading}
+                  placeholder="Current password (required)"
+                  className="w-full px-5 py-3.5 pr-12 rounded-lg text-white font-medium bg-[#362222] border-2 border-[#4a3535] focus:outline-none focus:ring-2 focus:ring-[#ff4444] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                />
+                <button
+                  type="button"
+                  onClick={() =>
+                    setShowCurrentPasswordForEmail(!showCurrentPasswordForEmail)
+                  }
+                  disabled={isLoading}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-200 transition-colors disabled:opacity-50"
+                  aria-label={
+                    showCurrentPasswordForEmail
+                      ? "Hide password"
+                      : "Show password"
+                  }
+                >
+                  {showCurrentPasswordForEmail ? (
+                    <EyeOff size={20} />
+                  ) : (
+                    <Eye size={20} />
+                  )}
+                </button>
+              </div>
+              <div className="flex gap-3">
                 <button
                   onClick={handleSaveEmail}
-                  className="px-8 py-3.5 rounded-lg bg-[#ff4444] hover:bg-[#cc0000] text-white font-bold transition-all hover:scale-105 active:scale-95 shadow-lg"
+                  disabled={isLoading}
+                  className="px-8 py-3.5 rounded-lg bg-[#ff4444] hover:bg-[#cc0000] text-white font-bold transition-all hover:scale-105 active:scale-95 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  Save
+                  {isLoading ? "Saving..." : "Save"}
                 </button>
                 <button
                   onClick={() => {
                     setIsEditingEmail(false);
-                    setEmailError("");
+                    setCurrentPasswordForEmail("");
                   }}
-                  className="px-8 py-3.5 rounded-lg bg-[#423F3E] hover:bg-[#504d4c] text-gray-300 font-semibold transition-all hover:scale-105 active:scale-95"
+                  disabled={isLoading}
+                  className="px-8 py-3.5 rounded-lg bg-[#423F3E] hover:bg-[#504d4c] text-gray-300 font-semibold transition-all hover:scale-105 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   Cancel
                 </button>
-              </>
-            )}
-          </div>
-          {emailError && (
-            <p className="text-[#ff4444] text-sm mt-2 font-medium">
-              {emailError}
-            </p>
+              </div>
+            </div>
           )}
         </div>
 
+        {/* Password Section */}
         <div>
           <label className="block text-sm font-bold text-gray-300 mb-3 uppercase tracking-wide">
             Password
@@ -121,7 +207,8 @@ const AccountSettings = ({
           {!isEditingPassword ? (
             <button
               onClick={() => setIsEditingPassword(true)}
-              className="px-8 py-3.5 rounded-lg bg-[#362222] hover:bg-[#4a3535] text-white font-semibold transition-all hover:scale-105 active:scale-95 border border-[#4a3535]"
+              disabled={isLoading}
+              className="px-8 py-3.5 rounded-lg bg-[#362222] hover:bg-[#4a3535] text-white font-semibold transition-all hover:scale-105 active:scale-95 border border-[#4a3535] disabled:opacity-50 disabled:cursor-not-allowed"
             >
               Change Password
             </button>
@@ -131,17 +218,16 @@ const AccountSettings = ({
                 <input
                   type={showCurrentPassword ? "text" : "password"}
                   value={currentPassword}
-                  onChange={(e) => {
-                    setCurrentPassword(e.target.value);
-                    setPasswordError("");
-                  }}
+                  onChange={(e) => setCurrentPassword(e.target.value)}
+                  disabled={isLoading}
                   placeholder="Current password"
-                  className="w-full px-5 py-3.5 pr-12 rounded-lg text-white font-medium bg-[#362222] border-2 border-[#4a3535] focus:outline-none focus:ring-2 focus:ring-[#ff4444] transition-all"
+                  className="w-full px-5 py-3.5 pr-12 rounded-lg text-white font-medium bg-[#362222] border-2 border-[#4a3535] focus:outline-none focus:ring-2 focus:ring-[#ff4444] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                 />
                 <button
                   type="button"
                   onClick={() => setShowCurrentPassword(!showCurrentPassword)}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-200 transition-colors"
+                  disabled={isLoading}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-200 transition-colors disabled:opacity-50"
                   aria-label={
                     showCurrentPassword ? "Hide password" : "Show password"
                   }
@@ -157,17 +243,16 @@ const AccountSettings = ({
                 <input
                   type={showNewPassword ? "text" : "password"}
                   value={newPassword}
-                  onChange={(e) => {
-                    setNewPassword(e.target.value);
-                    setPasswordError("");
-                  }}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  disabled={isLoading}
                   placeholder="New password (min. 8 characters)"
-                  className="w-full px-5 py-3.5 pr-12 rounded-lg text-white font-medium bg-[#362222] border-2 border-[#4a3535] focus:outline-none focus:ring-2 focus:ring-[#ff4444] transition-all"
+                  className="w-full px-5 py-3.5 pr-12 rounded-lg text-white font-medium bg-[#362222] border-2 border-[#4a3535] focus:outline-none focus:ring-2 focus:ring-[#ff4444] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                 />
                 <button
                   type="button"
                   onClick={() => setShowNewPassword(!showNewPassword)}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-200 transition-colors"
+                  disabled={isLoading}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-200 transition-colors disabled:opacity-50"
                   aria-label={
                     showNewPassword ? "Hide password" : "Show password"
                   }
@@ -175,26 +260,22 @@ const AccountSettings = ({
                   {showNewPassword ? <EyeOff size={20} /> : <Eye size={20} />}
                 </button>
               </div>
-              {passwordError && (
-                <p className="text-[#ff4444] text-sm font-medium">
-                  {passwordError}
-                </p>
-              )}
               <div className="flex gap-3 pt-2">
                 <button
                   onClick={handleSavePassword}
-                  className="px-8 py-3.5 rounded-lg bg-[#ff4444] hover:bg-[#cc0000] text-white font-bold transition-all hover:scale-105 active:scale-95 shadow-lg"
+                  disabled={isLoading}
+                  className="px-8 py-3.5 rounded-lg bg-[#ff4444] hover:bg-[#cc0000] text-white font-bold transition-all hover:scale-105 active:scale-95 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  Save Password
+                  {isLoading ? "Saving..." : "Save Password"}
                 </button>
                 <button
                   onClick={() => {
                     setIsEditingPassword(false);
                     setCurrentPassword("");
                     setNewPassword("");
-                    setPasswordError("");
                   }}
-                  className="px-8 py-3.5 rounded-lg bg-[#423F3E] hover:bg-[#504d4c] text-gray-300 font-semibold transition-all hover:scale-105 active:scale-95"
+                  disabled={isLoading}
+                  className="px-8 py-3.5 rounded-lg bg-[#423F3E] hover:bg-[#504d4c] text-gray-300 font-semibold transition-all hover:scale-105 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   Cancel
                 </button>

@@ -96,4 +96,41 @@ export const userService = {
             return { error: error.message || 'Failed to remove from cart', status: 500 };
         }
     },
+
+    // get current user profile
+    async getProfile(): Promise<ApiResponse<User>> {
+        try {
+            return await apiClient.get<User>('/api/UserProfile');
+        } catch (error: any) {
+            return { error: error.message || 'Failed to get profile', status: 500 };
+        }
+    },
+
+    // update user profile
+    async updateProfile(updatedData: Partial<User>): Promise<ApiResponse<User>> {
+        try {
+            return await apiClient.put<User>('/api/UserProfile', updatedData);
+        } catch (error: any) {
+            return { error: error.message || 'Failed to update profile', status: 500 };
+        }
+    },
+
+    // Remove your account - requires password confirmation
+    async deleteAccount(password: string): Promise<ApiResponse<string>> {
+        try {
+            const payload = { password };
+            console.log('Sending delete request with payload:', payload);
+            console.log('Password length:', password.length);
+            console.log('Password value:', password);
+            
+            return await apiClient.delete<string>('/api/UserProfile', { 
+                data: payload
+            }); 
+        } catch (error: any) {
+            console.error('Delete account error:', error);
+            return { error: error.message || 'Failed to delete account', status: 500 };
+        }
+    }
+
+
 };

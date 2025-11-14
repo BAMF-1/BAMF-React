@@ -1,22 +1,18 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
+import { useRouter } from "next/navigation";
 import ProfileHeader from "@/components/Profile/ProfileHeader";
 import AccountSettings from "@/components/Profile/AccountSettings";
 import DangerZone from "@/components/Profile/DangerZone";
 import OrderHistory from "@/components/Profile/OrderHistory";
 
 const ProfilePage = () => {
-  const { isAuthenticated, user } = useAuth();
-  const [email, setEmail] = useState(user?.email || "");
+  const { user, isLoading } = useAuth();
+  const router = useRouter();
+  const [email, setEmail] = useState("");
 
-  // Update email when user data changes
-  useEffect(() => {
-    if (user?.email) {
-      setEmail(user.email);
-    }
-  }, [user?.email]);
-
+  // Mock order history data, until integrated with backend
   const [orderHistory] = useState([
     {
       id: "ORD-2024-001",
@@ -56,24 +52,32 @@ const ProfilePage = () => {
     },
   ]);
 
+  // Redirect based on authentication and role
+  useEffect(() => {
+    if (!isLoading) {
+      if (!user) {
+        router.push("/");
+      } else if (user.role === "Admin") {
+        router.push("/admin");
+      } else {
+        setEmail(user.email);
+      }
+    }
+  }, [user, isLoading, router]);
+
+  // Show a loading state or redirecting state
+  if (isLoading || !user || user.role === "Admin") {
+    return <div className="min-h-screen bg-[#1a1a1a]" />; 
+  }
+
   return (
     <div className="min-h-screen bg-[#171010] text-white">
-      {isAuthenticated ? (
-        <div className="max-w-6xl mx-auto px-4 py-12">
-          <ProfileHeader />
-          <AccountSettings email={email} setEmail={setEmail} />
-          <DangerZone />
-          <OrderHistory orders={orderHistory} />
-        </div>
-      ) : (
-        <div className="flex flex-col items-center justify-center min-h-screen text-center px-4">
-          <h2 className="text-3xl font-bold mb-4">You are not logged in</h2>
-          <p className="text-gray-400">
-            Please log in to view and manage your profile settings and order
-            history.
-          </p>
-        </div>
-      )}
+      <div className="max-w-6xl mx-auto px-4 py-12">
+        <ProfileHeader />
+        <AccountSettings email={email} setEmail={setEmail} />
+        <DangerZone />
+        <OrderHistory orders={orderHistory} />
+      </div>
     </div>
   );
 };

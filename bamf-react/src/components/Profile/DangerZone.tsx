@@ -1,28 +1,40 @@
 import React, { useState } from "react";
 import { Eye, EyeOff, AlertTriangle } from "lucide-react";
+import { userService } from "@/services/user.service";
+import { useAuth } from "@/contexts/AuthContext";
+import { toast } from "react-toastify";
 
 const DangerZone = () => {
+  const { logout } = useAuth();
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [error, setError] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleDelete = () => {
+  const handleDelete = async () => {
+    // Validate password
     if (!password) {
-      setError("Password is required to delete your account");
+      toast.error("Password is required to delete your account");
       return;
     }
-    // Account deletion would be processed here
-    console.log("Account deletion confirmed");
-    setShowDeleteModal(false);
-    setPassword("");
-    setError("");
+    // Proceed with deletion
+    setIsLoading(true);
+    const response = await userService.deleteAccount(password);
+
+    if (response.error) {
+      toast.error(response.error);
+      setIsLoading(false);
+      return;
+    }
+
+    toast.success("Account deleted successfully");
+    await logout();
   };
 
   const handleCloseModal = () => {
+    if (isLoading) return;
     setShowDeleteModal(false);
     setPassword("");
-    setError("");
   };
 
   return (
@@ -44,7 +56,8 @@ const DangerZone = () => {
       </div>
       <button
         onClick={() => setShowDeleteModal(true)}
-        className="px-8 py-3.5 rounded-lg border-2 border-[#ff4444] text-[#ff4444] hover:bg-[#ff4444] hover:text-white font-bold transition-all hover:scale-105 active:scale-95 uppercase tracking-wide"
+        disabled={isLoading}
+        className="px-8 py-3.5 rounded-lg border-2 border-[#ff4444] text-[#ff4444] hover:bg-[#ff4444] hover:text-white font-bold transition-all hover:scale-105 active:scale-95 uppercase tracking-wide disabled:opacity-50 disabled:cursor-not-allowed"
       >
         Delete Account
       </button>
@@ -75,32 +88,32 @@ const DangerZone = () => {
                 value={password}
                 onChange={(e) => {
                   setPassword(e.target.value);
-                  setError("");
                 }}
+                disabled={isLoading}
                 placeholder="Enter your password"
-                className="w-full px-5 py-3.5 pr-12 rounded-lg text-white font-medium bg-[#362222] border-2 border-[#4a3535] focus:outline-none focus:ring-2 focus:ring-[#ff4444]"
+                className="w-full px-5 py-3.5 pr-12 rounded-lg text-white font-medium bg-[#362222] border-2 border-[#4a3535] focus:outline-none focus:ring-2 focus:ring-[#ff4444] disabled:opacity-50 disabled:cursor-not-allowed"
               />
               <button
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-200"
+                disabled={isLoading}
+                className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-200 disabled:opacity-50"
                 aria-label={showPassword ? "Hide password" : "Show password"}
               >
                 {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
               </button>
             </div>
-            {error && (
-              <p className="text-[#ff4444] text-sm mb-4 font-medium">{error}</p>
-            )}
             <div className="flex gap-3">
               <button
                 onClick={handleDelete}
-                className="flex-1 px-6 py-3.5 rounded-lg bg-[#ff4444] hover:bg-[#cc0000] text-white font-bold transition-all hover:scale-105 active:scale-95 shadow-lg"
+                disabled={isLoading}
+                className="flex-1 px-6 py-3.5 rounded-lg bg-[#ff4444] hover:bg-[#cc0000] text-white font-bold transition-all hover:scale-105 active:scale-95 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                Delete Forever
+                {isLoading ? "Deleting..." : "Delete Forever"}
               </button>
               <button
                 onClick={handleCloseModal}
-                className="flex-1 px-6 py-3.5 rounded-lg bg-[#423F3E] hover:bg-[#504d4c] text-gray-300 font-semibold transition-all hover:scale-105 active:scale-95"
+                disabled={isLoading}
+                className="flex-1 px-6 py-3.5 rounded-lg bg-[#423F3E] hover:bg-[#504d4c] text-gray-300 font-semibold transition-all hover:scale-105 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 Cancel
               </button>
