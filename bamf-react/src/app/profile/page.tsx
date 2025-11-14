@@ -12,24 +12,7 @@ const ProfilePage = () => {
   const router = useRouter();
   const [email, setEmail] = useState("");
 
-  // Redirect based on authentication and role
-  useEffect(() => {
-    if (!isLoading) {
-      if (!user) {
-        router.push("/");
-      } else if (user.role === "Admin") {
-        router.push("/admin");
-      } else {
-        setEmail(user.email);
-      }
-    }
-  }, [user, isLoading, router]);
-
-  // Show a loading state or redirecting state
-  if (isLoading || !user || user.role === "Admin") {
-    return <div className="min-h-screen bg-[#1a1a1a]" />; // or a loading skeleton
-  }
-
+  // Mock order history data, until integrated with backend
   const [orderHistory] = useState([
     {
       id: "ORD-2024-001",
@@ -68,6 +51,24 @@ const ProfilePage = () => {
         "https://images.unsplash.com/photo-1560343090-f0409e92791a?w=400&h=400&fit=crop",
     },
   ]);
+
+  // Redirect based on authentication and role
+  useEffect(() => {
+    if (!isLoading) {
+      if (!user) {
+        router.push("/");
+      } else if (user.role === "Admin") {
+        router.push("/admin");
+      } else {
+        setEmail(user.email);
+      }
+    }
+  }, [user, isLoading, router]);
+
+  // Show a loading state or redirecting state
+  if (isLoading || !user || user.role === "Admin") {
+    return <div className="min-h-screen bg-[#1a1a1a]" />; 
+  }
 
   return (
     <div className="min-h-screen bg-[#171010] text-white">

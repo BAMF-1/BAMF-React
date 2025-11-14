@@ -48,9 +48,10 @@ const AccountSettings = ({
       return;
     }
 
-    // Re-login with new email to get updated token
+    // Re-login with new email to get updated token, workaround for backend limitations, sorry folks :)
     const loginResponse = await login(newEmail, currentPasswordForEmail);
 
+    // Handle login failure
     if (!loginResponse.success) {
       toast.warning(
         "Email updated but auto-login failed. Please log in manually with your new email."
@@ -58,7 +59,6 @@ const AccountSettings = ({
       setIsLoading(false);
       return;
     }
-
     toast.success("Email updated successfully!");
     setEmail(newEmail);
     setIsEditingEmail(false);
@@ -78,7 +78,9 @@ const AccountSettings = ({
 
     setIsLoading(true);
 
+    // Update profile with new password
     const response = await userService.updateProfile({
+      email: email,
       currentPassword,
       newPassword,
     });

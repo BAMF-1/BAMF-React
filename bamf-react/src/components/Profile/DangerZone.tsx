@@ -2,33 +2,32 @@ import React, { useState } from "react";
 import { Eye, EyeOff, AlertTriangle } from "lucide-react";
 import { userService } from "@/services/user.service";
 import { useAuth } from "@/contexts/AuthContext";
+import { toast } from "react-toastify";
 
 const DangerZone = () => {
   const { logout } = useAuth();
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
   const handleDelete = async () => {
+    // Validate password
     if (!password) {
-      setError("Password is required to delete your account");
+      toast.error("Password is required to delete your account");
       return;
     }
-
+    // Proceed with deletion
     setIsLoading(true);
-    setError("");
-
-    console.log("Deleting account with password:", password)
     const response = await userService.deleteAccount(password);
 
     if (response.error) {
-      setError(response.error);
+      toast.error(response.error);
       setIsLoading(false);
       return;
     }
 
+    toast.success("Account deleted successfully");
     await logout();
   };
 
@@ -36,7 +35,6 @@ const DangerZone = () => {
     if (isLoading) return;
     setShowDeleteModal(false);
     setPassword("");
-    setError("");
   };
 
   return (
@@ -90,7 +88,6 @@ const DangerZone = () => {
                 value={password}
                 onChange={(e) => {
                   setPassword(e.target.value);
-                  setError("");
                 }}
                 disabled={isLoading}
                 placeholder="Enter your password"
@@ -105,9 +102,6 @@ const DangerZone = () => {
                 {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
               </button>
             </div>
-            {error && (
-              <p className="text-[#ff4444] text-sm mb-4 font-medium">{error}</p>
-            )}
             <div className="flex gap-3">
               <button
                 onClick={handleDelete}
