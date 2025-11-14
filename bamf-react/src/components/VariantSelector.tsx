@@ -40,8 +40,8 @@ export default function VariantSelector({
     );
   }, [group.variants, color, size]);
 
-  const colorsAvailable = useMemo(() => group.facets.colors.map((c) => c.value), [group.facets.colors]);
-  const sizesAvailable = useMemo(() => group.facets.sizes.map((s) => s.value), [group.facets.sizes]);
+  const colorsAvailable = useMemo(() => group.facets.colors?.map((c) => c.value) || [], [group.facets.colors]);
+  const sizesAvailable = useMemo(() => group.facets.sizes?.map((s) => s.value) || [], [group.facets.sizes]);
 
   const sizesEnabled = useMemo(() => {
     if (!color) return new Set(sizesAvailable);
@@ -98,6 +98,34 @@ export default function VariantSelector({
       <div>
         <h1 className="text-2xl font-semibold">{group.name}</h1>
         <div className="mt-2 text-lg">{displayPrice}</div>
+
+        {/* NEW: Variant Metadata Section */}
+        {resolved && (resolved.description || resolved.brand || resolved.material) && (
+          <div className="mt-4 space-y-3 border-t border-b border-gray-200 py-4">
+            {resolved.brand && (
+              <div className="flex items-baseline gap-2">
+                <span className="text-sm text-gray-500 font-medium">Brand:</span>
+                <span className="text-sm text-gray-900">{resolved.brand}</span>
+              </div>
+            )}
+            
+            {resolved.material && (
+              <div className="flex items-baseline gap-2">
+                <span className="text-sm text-gray-500 font-medium">Material:</span>
+                <span className="text-sm text-gray-900">{resolved.material}</span>
+              </div>
+            )}
+            
+            {resolved.description && (
+              <div>
+                <h3 className="text-sm font-medium text-gray-700 mb-1">Description</h3>
+                <p className="text-sm text-gray-600 leading-relaxed">
+                  {resolved.description}
+                </p>
+              </div>
+            )}
+          </div>
+        )}
 
         {/* Color */}
         {colorsAvailable.length > 0 && (

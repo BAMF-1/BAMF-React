@@ -21,7 +21,7 @@ export default function ProductCard({
   const productIdentifier = product.groupSlug || product.groupId;
   
   if (!productIdentifier) {
-    console.warn(' Product missing both groupSlug and groupId:', product);
+    console.warn('⚠️ Product missing both groupSlug and groupId:', product);
     return null;
   }
 
@@ -56,6 +56,28 @@ export default function ProductCard({
       <div className="p-3">
         <div className="font-medium line-clamp-2">{product.groupName}</div>
         <div className="mt-1 text-sm text-gray-600">{priceText}</div>
+        
+        {/* METADATA DISPLAY - Shows if available */}
+        {(product.description || product.brand || product.material) && (
+          <div className="mt-2 text-xs text-gray-500 space-y-0.5">
+            {product.brand && (
+              <div className="truncate">
+                <span className="font-semibold">Brand:</span> {product.brand}
+              </div>
+            )}
+            {product.material && (
+              <div className="truncate">
+                <span className="font-semibold">Material:</span> {product.material}
+              </div>
+            )}
+            {product.description && (
+              <div className="line-clamp-2">
+                <span className="font-semibold">Desc:</span> {product.description}
+              </div>
+            )}
+          </div>
+        )}
+        
         {product.totalVariants > 1 && (
           <div className="mt-1 text-xs text-gray-500">{product.totalVariants} options</div>
         )}
