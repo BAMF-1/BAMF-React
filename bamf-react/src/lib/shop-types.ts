@@ -1,4 +1,5 @@
 // lib/shop-types.ts
+
 export type Category = {
   id: string;
   name: string;
@@ -58,6 +59,14 @@ export type GroupedProductCard = {
   material?: string | null;
 };
 
+// ✅ NEW: Image type for gallery
+export type VariantImage = {
+  url: string;
+  altText?: string | null;
+  isPrimary: boolean;
+  sortOrder: number;
+};
+
 export type GroupDetail = {
   groupId: string;
   groupSlug?: string | null;
@@ -81,6 +90,8 @@ export type GroupDetail = {
     description?: string | null;
     brand?: string | null;
     material?: string | null;
+    // ✅ NEW: Images array for gallery
+    images?: VariantImage[];
   }>;
   facets: {
     colors?: Array<{ value: string; count: number }>;
@@ -92,7 +103,3 @@ export type GroupDetail = {
   totalVariants?: number;
   totalPages?: number;
 };
-
-
-
-

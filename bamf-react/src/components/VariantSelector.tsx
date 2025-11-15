@@ -1,125 +1,124 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
-import Image from 'next/image';
-import { GroupDetail } from '@/lib/shop-types';
-import { useRouter } from 'next/navigation';
+import { useMemo, useState } from 'react';
+import ImageGallery from './ImageGallery';
 
-export default function VariantSelector({
-  group,
-  sku,
-}: {
-  group: GroupDetail;
-  sku?: string;
-}) {
-  const router = useRouter();
+interface VariantSelectorProps {
+  group: {
+    name: string;
+    variants: Array<{
+      sku: string;
+      color?: string | null;  // ✅ Make optional
+      size?: string | null;   // ✅ Make optional
+      price: number;
+      inStock: boolean;
+      description?: string | null;
+      brand?: string | null;
+      material?: string | null;
+      images?: Array<{
+        url: string;
+        altText?: string | null;
+        isPrimary: boolean;
+        sortOrder: number;
+      }>;
+    }>;
+    facets: {
+      colors?: Array<{ value: string; count: number }>;  // ✅ Make optional
+      sizes?: Array<{ value: string; count: number }>;   // ✅ Make optional
+    };
+  };
+  initialSku?: string;
+}
 
-  const [color, setColor] = useState<string | undefined>(undefined);
-  const [size, setSize] = useState<string | undefined>(undefined);
+export default function VariantSelector({ group, initialSku }: VariantSelectorProps) {
+  // Find initial variant
+  const initialVariant = initialSku 
+    ? group.variants.find(v => v.sku === initialSku)
+    : group.variants[0];
 
-  // Preselect from props.sku or fallback
-  useEffect(() => {
-    if (sku) {
-      const v = group.variants.find((x) => x.sku === sku);
-      if (v) {
-        setColor(v.color || undefined);
-        setSize(v.size || undefined);
-        return;
-      }
-    }
-    const firstInStock = group.variants.find((x) => x.inStock) ?? group.variants[0];
-    if (firstInStock) {
-      setColor(firstInStock.color || undefined);
-      setSize(firstInStock.size || undefined);
-    }
-  }, [group, sku]);
+  const [color, setColor] = useState(initialVariant?.color || '');
+  const [size, setSize] = useState(initialVariant?.size || '');
 
-  const resolved = useMemo(() => {
-    return group.variants.find(
-      (v) => (color ? v.color === color : true) && (size ? v.size === size : true)
-    );
-  }, [group.variants, color, size]);
+  // Get available colors and sizes (handle undefined facets)
+  const colorsAvailable = group.facets?.colors?.map(c => c.value) || [];
+  const sizesAvailable = group.facets?.sizes?.map(s => s.value) || [];
 
-  const colorsAvailable = useMemo(() => group.facets.colors?.map((c) => c.value) || [], [group.facets.colors]);
-  const sizesAvailable = useMemo(() => group.facets.sizes?.map((s) => s.value) || [], [group.facets.sizes]);
-
-  const sizesEnabled = useMemo(() => {
-    if (!color) return new Set(sizesAvailable);
-    return new Set(group.variants.filter((v) => v.color === color).map((v) => v.size || '').filter(Boolean));
-  }, [group.variants, color, sizesAvailable]);
-
+  // Determine enabled colors based on selected size
   const colorsEnabled = useMemo(() => {
     if (!size) return new Set(colorsAvailable);
-    return new Set(group.variants.filter((v) => v.size === size).map((v) => v.color || '').filter(Boolean));
-  }, [group.variants, size, colorsAvailable]);
+    return new Set(
+      group.variants
+        .filter(v => v.size === size)
+        .map(v => v.color)
+        .filter((c): c is string => c != null)  // ✅ Filter out nulls
+    );
+  }, [size, group.variants, colorsAvailable]);
 
-  const displayPrice =
-    group.minPrice === group.maxPrice
-      ? `$${group.minPrice.toFixed(2)}`
-      : resolved
-      ? `$${resolved.price.toFixed(2)}`
-      : `From $${group.minPrice.toFixed(2)}`;
+  // Determine enabled sizes based on selected color
+  const sizesEnabled = useMemo(() => {
+    if (!color) return new Set(sizesAvailable);
+    return new Set(
+      group.variants
+        .filter(v => v.color === color)
+        .map(v => v.size)
+        .filter((s): s is string => s != null)  // ✅ Filter out nulls
+    );
+  }, [color, group.variants, sizesAvailable]);
 
-  const mainImage = resolved?.primaryImageUrl || group.heroImageUrl;
+  // Get the resolved variant
+  const resolved = useMemo(() => {
+    return group.variants.find(v => v.color === color && v.size === size);
+  }, [color, size, group.variants]);
 
-  function onAddToCart() {
-    if (!resolved || !resolved.inStock) return;
-    alert(`Added to cart: ${group.name} (${resolved.color || ''} ${resolved.size || ''}) [${resolved.sku}]`);
-  }
+  // Get images for current variant (based on color)
+  const currentImages = useMemo(() => {
+    if (!resolved || !resolved.images) return [];
+    return resolved.images;
+  }, [resolved]);
 
-  // Sync selected SKU to URL for sharability
-  useEffect(() => {
-    if (resolved?.sku) {
-      const params = new URLSearchParams(window.location.search);
-      params.set('sku', resolved.sku);
-      router.replace(`?${params.toString()}`, { scroll: false });
-    }
-  }, [resolved?.sku, router]);
+  // Display price
+  const displayPrice = resolved
+    ? `$${resolved.price.toFixed(2)}`
+    : group.variants.length > 0
+    ? `From $${Math.min(...group.variants.map(v => v.price)).toFixed(2)}`
+    : 'N/A';
 
   return (
-    <div className="grid md:grid-cols-2 gap-8">
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+      {/* Left Column - Image Gallery */}
       <div>
-        <div className="aspect-square bg-gray-50 relative rounded-2xl overflow-hidden">
-          {mainImage ? (
-            <Image
-              src={mainImage}
-              alt={group.name}
-              fill
-              className="object-cover"
-              sizes="(min-width: 1024px) 40vw, 100vw"
-              priority
-            />
-          ) : (
-            <div className="w-full h-full grid place-items-center text-gray-400">No Image</div>
-          )}
-        </div>
+        <ImageGallery 
+          images={currentImages} 
+          productName={group.name}
+        />
       </div>
 
+      {/* Right Column - Product Info */}
       <div>
-        <h1 className="text-2xl font-semibold">{group.name}</h1>
-        <div className="mt-2 text-lg">{displayPrice}</div>
+        <h1 className="text-3xl font-bold text-white mb-2">{group.name}</h1>
+        <div className="text-2xl text-white mb-6">{displayPrice}</div>
 
-        {/* NEW: Variant Metadata Section */}
+        {/* Variant Metadata Section */}
         {resolved && (resolved.description || resolved.brand || resolved.material) && (
-          <div className="mt-4 space-y-3 border-t border-b border-gray-200 py-4">
+          <div className="mb-6 space-y-3 border-t border-b border-gray-700 py-4">
             {resolved.brand && (
               <div className="flex items-baseline gap-2">
-                <span className="text-sm text-gray-500 font-medium">Brand:</span>
-                <span className="text-sm text-gray-900">{resolved.brand}</span>
+                <span className="text-sm text-gray-400 font-medium">Brand:</span>
+                <span className="text-sm text-white">{resolved.brand}</span>
               </div>
             )}
             
             {resolved.material && (
               <div className="flex items-baseline gap-2">
-                <span className="text-sm text-gray-500 font-medium">Material:</span>
-                <span className="text-sm text-gray-900">{resolved.material}</span>
+                <span className="text-sm text-gray-400 font-medium">Material:</span>
+                <span className="text-sm text-white">{resolved.material}</span>
               </div>
             )}
             
             {resolved.description && (
               <div>
-                <h3 className="text-sm font-medium text-gray-700 mb-1">Description</h3>
-                <p className="text-sm text-gray-600 leading-relaxed">
+                <h3 className="text-sm font-medium text-gray-400 mb-1">Description</h3>
+                <p className="text-sm text-gray-200 leading-relaxed">
                   {resolved.description}
                 </p>
               </div>
@@ -127,10 +126,12 @@ export default function VariantSelector({
           </div>
         )}
 
-        {/* Color */}
+        {/* Color Selector */}
         {colorsAvailable.length > 0 && (
-          <div className="mt-6">
-            <div className="text-sm font-medium mb-2">Color</div>
+          <div className="mb-6">
+            <div className="text-sm font-medium text-gray-300 mb-2">
+              Color {color && <span className="text-white">: {color}</span>}
+            </div>
             <div className="flex flex-wrap gap-2">
               {colorsAvailable.map((c) => {
                 const isEnabled = colorsEnabled.has(c);
@@ -139,11 +140,14 @@ export default function VariantSelector({
                   <button
                     key={c}
                     disabled={!isEnabled}
-                    className={`px-3 py-1 rounded-full border ${
-                      isSelected ? 'bg-gray-900 text-white' : ''
-                    } ${!isEnabled ? 'opacity-40 cursor-not-allowed' : ''}`}
                     onClick={() => setColor(c)}
-                    aria-pressed={isSelected}
+                    className={`px-4 py-2 rounded-lg border transition-all ${
+                      isSelected 
+                        ? 'bg-white text-black border-white' 
+                        : isEnabled
+                        ? 'bg-gray-800 text-white border-gray-600 hover:border-gray-400'
+                        : 'bg-gray-900 text-gray-600 border-gray-800 cursor-not-allowed'
+                    }`}
                   >
                     {c}
                   </button>
@@ -153,10 +157,12 @@ export default function VariantSelector({
           </div>
         )}
 
-        {/* Size */}
+        {/* Size Selector */}
         {sizesAvailable.length > 0 && (
-          <div className="mt-4">
-            <div className="text-sm font-medium mb-2">Size</div>
+          <div className="mb-6">
+            <div className="text-sm font-medium text-gray-300 mb-2">
+              Size {size && <span className="text-white">: {size}</span>}
+            </div>
             <div className="flex flex-wrap gap-2">
               {sizesAvailable.map((s) => {
                 const isEnabled = sizesEnabled.has(s);
@@ -165,11 +171,14 @@ export default function VariantSelector({
                   <button
                     key={s}
                     disabled={!isEnabled}
-                    className={`px-3 py-1 rounded-full border ${
-                      isSelected ? 'bg-gray-900 text-white' : ''
-                    } ${!isEnabled ? 'opacity-40 cursor-not-allowed' : ''}`}
                     onClick={() => setSize(s)}
-                    aria-pressed={isSelected}
+                    className={`px-4 py-2 rounded-lg border transition-all ${
+                      isSelected 
+                        ? 'bg-white text-black border-white' 
+                        : isEnabled
+                        ? 'bg-gray-800 text-white border-gray-600 hover:border-gray-400'
+                        : 'bg-gray-900 text-gray-600 border-gray-800 cursor-not-allowed'
+                    }`}
                   >
                     {s}
                   </button>
@@ -179,43 +188,38 @@ export default function VariantSelector({
           </div>
         )}
 
-        {/* Stock */}
-        <div className="mt-4 text-sm">
-          {resolved ? (
-            resolved.inStock ? (
-              <span className="text-green-700">In stock</span>
+        {/* Stock Status */}
+        {resolved && (
+          <div className="mb-6">
+            {resolved.inStock ? (
+              <span className="text-green-400 text-sm">✓ In Stock</span>
             ) : (
-              <span className="text-red-700">Out of stock</span>
-            )
-          ) : (
-            <span className="text-gray-600">Select options</span>
-          )}
-        </div>
+              <span className="text-red-400 text-sm">✗ Out of Stock</span>
+            )}
+          </div>
+        )}
 
-        {/* SKU */}
-        <div className="mt-1 text-xs text-gray-500">{resolved?.sku && <>SKU: {resolved.sku}</>}</div>
-
-        {/* CTA */}
-        <div className="mt-6">
+        {/* Add to Cart Button */}
+        {resolved && (
           <button
-            disabled={!resolved || !resolved.inStock}
-            className="w-full md:w-auto px-6 py-3 rounded-xl bg-black text-white disabled:opacity-40"
-            onClick={onAddToCart}
+            disabled={!resolved.inStock}
+            className={`w-full py-3 rounded-lg font-medium transition-all ${
+              resolved.inStock
+                ? 'bg-white text-black hover:bg-gray-200'
+                : 'bg-gray-800 text-gray-500 cursor-not-allowed'
+            }`}
           >
-            Add to cart
+            {resolved.inStock ? 'Add to Cart' : 'Out of Stock'}
           </button>
-        </div>
+        )}
 
-        {/* Details */}
-        <div className="mt-8 text-sm text-gray-700 space-y-2">
-          <p>
-            {group.inStockAny
-              ? 'This product has multiple variants. Choose color and size to see exact availability.'
-              : 'Currently unavailable. Check back soon.'}
-          </p>
-        </div>
+        {/* SKU Display */}
+        {resolved && (
+          <div className="mt-4 text-xs text-gray-500">
+            SKU: {resolved.sku}
+          </div>
+        )}
       </div>
     </div>
   );
 }
-

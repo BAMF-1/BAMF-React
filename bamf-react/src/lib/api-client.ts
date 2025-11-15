@@ -499,11 +499,11 @@ export async function fetchCategoryListing(
 
 /** Product group detail (with all variants + color/size facets) */
 // lib/api-client.ts
+// lib/api-client.ts - Updated fetchGroupDetail function
 export async function fetchGroupDetail(slugOrId: string, sku?: string): Promise<GroupDetail> {
   const query = sku ? `?sku=${encodeURIComponent(sku)}` : '';
   const raw = await requestJSON<any>(`/api/groups/${encodeURIComponent(slugOrId)}${query}`);
   
-  // Transform backend response to match GroupDetail type
   return {
     groupId: raw.objectId,
     groupSlug: raw.slug,
@@ -514,17 +514,26 @@ export async function fetchGroupDetail(slugOrId: string, sku?: string): Promise<
     maxPrice: raw.maxPrice,
     inStockAny: raw.inStockAny,
     variants: (raw.variants || []).map((v: any) => ({
-      id: v.sku,  // Use SKU as id since backend doesn't return id
+      id: v.sku,
       sku: v.sku,
       color: v.color,
       size: v.size,
       price: v.price,
       inStock: v.inStock,
       primaryImageUrl: v.primaryImageUrl,
+      description: v.description,
+      brand: v.brand,
+      material: v.material,
+      images: (v.images || []).map((img: any) => ({
+        url: img.url,
+        altText: img.altText,
+        isPrimary: img.isPrimary,
+        sortOrder: img.sortOrder,
+      })),
     })),
     facets: {
-      colors: raw.colors || [],  // Backend has colors at root, move to facets
-      sizes: raw.sizes || [],    // Backend has sizes at root, move to facets
+      colors: raw.colors || [],
+      sizes: raw.sizes || [],
     }
   };
 }
