@@ -5,21 +5,8 @@ const nextConfig: NextConfig = {
     remotePatterns: [
       {
         protocol: "https",
-        hostname: "picsum.photos",
+        hostname: "*", // Allow images from all domains
       },
-      {
-        protocol: "https",
-        hostname: "www.shutterstock.com",
-      },
-      {
-        protocol: "https",
-        hostname: "images.unsplash.com", // If you use Unsplash
-      },
-      {
-        protocol: "https",
-        hostname: "**.cloudinary.com", // If you use Cloudinary
-      },
-      // Add more as needed
     ],
   },
 };

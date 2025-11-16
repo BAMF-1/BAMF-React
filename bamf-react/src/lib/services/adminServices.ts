@@ -26,6 +26,22 @@ export interface Review {
 }
 
 export interface Item {
+    id: string;
+    sku: string;
+    objectId: string;
+    slug: string;
+    groupName: string;
+    mainCategory: string;
+    color: string;
+    size: string;
+    price: number;
+    inStock: boolean;
+    primaryImageUrl: string;
+    groupLink: string;
+    moreVariantsCount: number;
+}
+
+export interface OrderItem {
     id: number;
     orderId: number;
     productId: number;
@@ -41,7 +57,7 @@ export interface Order {
     total: number;
     status: string;
     createdUtc: string;
-    items?: Item[];
+    items?: OrderItem[];
 }
 
 export interface Variant {
@@ -138,7 +154,7 @@ export const orderService = {
     create: (email: string, items: Array<{ sku: string; quantity: number }>) => {
         return apiClient.post<Order>(`/api/Orders`, { email, items });
     },
-    update: (id: number, status?: string, total?: number, email?: string, items?: Item[]) => {
+    update: (id: number, status?: string, total?: number, email?: string, items?: OrderItem[]) => {
         const body: {
             status?: string;
             total?: number;
@@ -270,6 +286,11 @@ export const variantService = {
 
         return apiClient.post(`/api/admin/variants/${id}/inventory/adjust`, body);
     },
+};
+
+// =========== Items Service ==========
+export const itemService = {
+    getAll: (page: number = 1, pageSize: number = 30) => apiClient.get<Item[]>(`/api/products?page=${page}&pageSize=${pageSize}`),
 };
 
 // ========== Categories Service ==========

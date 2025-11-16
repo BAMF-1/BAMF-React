@@ -17,7 +17,7 @@ export async function generateMetadata({ params }: Props) {
 export default async function ProductPage({ params, searchParams }: Props) {
   const resolvedParams = await params;
   const resolvedSearchParams = await searchParams;
-  
+
   const categorySlug = resolvedParams.category;
   const productSlug = resolvedParams.product;
   const sku = resolvedSearchParams?.sku;
@@ -33,7 +33,7 @@ export default async function ProductPage({ params, searchParams }: Props) {
   const cat = categories.find(c => c.slug === categorySlug);
 
   return (
-    <div className="min-h-screen bg-black text-white">
+    <div className="min-h-screen text-white" style={{ backgroundColor: '#171010' }}>
       <div className="container mx-auto px-4 py-8">
         <Breadcrumbs
           items={[
