@@ -26,6 +26,22 @@ export interface Review {
 }
 
 export interface Item {
+    id: string;
+    sku: string;
+    objectId: string;
+    slug: string;
+    groupName: string;
+    mainCategory: string;
+    color: string;
+    size: string;
+    price: number;
+    inStock: boolean;
+    primaryImageUrl: string;
+    groupLink: string;
+    moreVariantsCount: number;
+}
+
+export interface OrderItem {
     id: number;
     orderId: number;
     productId: number;
@@ -41,7 +57,7 @@ export interface Order {
     total: number;
     status: string;
     createdUtc: string;
-    items?: Item[];
+    items?: OrderItem[];
 }
 
 export interface Variant {
@@ -53,6 +69,10 @@ export interface Variant {
     inventoryQuantity: number;
     lowStockThreshold: number;
     lastRestockDate: string | null;
+    // Metadata fields
+    description?: string;
+    brand?: string;
+    material?: string;
 }
 
 export interface Group {
@@ -134,7 +154,7 @@ export const orderService = {
     create: (email: string, items: Array<{ sku: string; quantity: number }>) => {
         return apiClient.post<Order>(`/api/Orders`, { email, items });
     },
-    update: (id: number, status?: string, total?: number, email?: string, items?: Item[]) => {
+    update: (id: number, status?: string, total?: number, email?: string, items?: OrderItem[]) => {
         const body: {
             status?: string;
             total?: number;
@@ -195,33 +215,62 @@ export const variantService = {
         apiClient.get<Variant[]>(`/api/admin/variants/by-group/${groupId}?page=${page}`),
     getByGroupCount: (groupId: number | string) =>
         apiClient.get<number>(`/api/admin/variants/by-group/count?groupId=${groupId}`),
-    create: (productGroupId: number | string, sku: string, color: string, size: string, price: number) => {
+    create: (
+        productGroupId: number | string,
+        sku: string,
+        color: string,
+        size: string,
+        price: number,
+        description?: string,
+        brand?: string,
+        material?: string
+    ) => {
         const body: {
             sku: string;
             productGroupId: string;
             color: string;
             size: string;
             price: number;
+            description?: string | null;
+            brand?: string | null;
+            material?: string | null;
         } = {
             sku,
             productGroupId: String(productGroupId),
             color,
             size,
-            price
+            price,
+            description: description || null,
+            brand: brand || null,
+            material: material || null
         };
 
         return apiClient.post<Variant>(`/api/admin/variants`, body);
     },
-    update: (id: string, color?: string, size?: string, price?: number) => {
+    update: (
+        id: string,
+        color?: string,
+        size?: string,
+        price?: number,
+        description?: string,
+        brand?: string,
+        material?: string
+    ) => {
         const body: {
             color?: string;
             size?: string;
             price?: number;
+            description?: string | null;
+            brand?: string | null;
+            material?: string | null;
         } = {};
 
         if (color !== undefined) body.color = color;
         if (size !== undefined) body.size = size;
         if (price !== undefined) body.price = price;
+        if (description !== undefined) body.description = description || null;
+        if (brand !== undefined) body.brand = brand || null;
+        if (material !== undefined) body.material = material || null;
 
         return apiClient.put<Variant>(`/api/admin/variants/${id}`, body);
     },
@@ -239,8 +288,15 @@ export const variantService = {
     },
 };
 
+// =========== Items Service ==========
+export const itemService = {
+    getAll: (page: number = 1, pageSize: number = 30) => apiClient.get<Item[]>(`/api/products?page=${page}&pageSize=${pageSize}`),
+};
+
 // ========== Categories Service ==========
 export const categoryService = {
     getAll: (page: number = 1) => apiClient.get<Category[]>(`/api/Categories?page=${page}`),
     getAllCount: () => apiClient.get<number>('/api/Categories/count'),
 };
+
+

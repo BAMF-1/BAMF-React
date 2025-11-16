@@ -1,4 +1,5 @@
 // lib/shop-types.ts
+
 export type Category = {
   id: string;
   name: string;
@@ -8,9 +9,9 @@ export type Category = {
 export type VariantListItem = {
   sku: string;
   groupId?: string | null;
-  groupSlug?: string | null;  // Change this
-  slug?: string | null;        //  Add this (backend returns "slug")
-  objectId?: string | null;    // Add this
+  groupSlug?: string | null;
+  slug?: string | null;
+  objectId?: string | null;
   groupName: string;
   price: number;
   inStock: boolean;
@@ -18,6 +19,10 @@ export type VariantListItem = {
   size?: string | null;
   primaryImageUrl?: string | null;
   moreVariantsCount?: number;
+  // Metadata fields
+  description?: string | null;
+  brand?: string | null;
+  material?: string | null;
 };
 
 export type SkuListItem = {
@@ -33,6 +38,10 @@ export type SkuListItem = {
   primaryImageUrl?: string;
   groupLink: string;
   moreVariantsCount: number;
+  // Metadata fields
+  description?: string | null;
+  brand?: string | null;
+  material?: string | null;
 };
 
 export type GroupedProductCard = {
@@ -45,13 +54,24 @@ export type GroupedProductCard = {
   totalVariants: number;
   anyInStock: boolean;
   sampleSku?: string;
+  description?: string | null;
+  brand?: string | null;
+  material?: string | null;
+};
+
+// ✅ NEW: Image type for gallery
+export type VariantImage = {
+  url: string;
+  altText?: string | null;
+  isPrimary: boolean;
+  sortOrder: number;
 };
 
 export type GroupDetail = {
   groupId: string;
   groupSlug?: string | null;
-  objectId?: string;  // Add this
-  slug?: string;      // Add this
+  objectId?: string;
+  slug?: string;
   name: string;
   mainCategory: string;
   heroImageUrl?: string | null;
@@ -66,14 +86,19 @@ export type GroupDetail = {
     price: number;
     inStock: boolean;
     primaryImageUrl?: string | null;
+    // Metadata fields
+    description?: string | null;
+    brand?: string | null;
+    material?: string | null;
+    // ✅ NEW: Images array for gallery
+    images?: VariantImage[];
   }>;
   facets: {
-    colors?: Array<{ value: string; count: number }>;  // Change from facets.colors
-    sizes?: Array<{ value: string; count: number }>;   // Change from facets.sizes
+    colors?: Array<{ value: string; count: number }>;
+    sizes?: Array<{ value: string; count: number }>;
     priceFacet?: { globalMin: number; globalMax: number };
   };
-
-page?: number;
+  page?: number;
   pageSize?: number;
   totalVariants?: number;
   totalPages?: number;
