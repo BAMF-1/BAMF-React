@@ -1,9 +1,85 @@
-const ProfilePage = () => (
-  <main className="flex min-h-screen items-center justify-center">
-    <h1 className="text-2xl font-semibold text-gray-500">
-      Page in development 🚧
-    </h1>
-  </main>
-);
+"use client";
+import React, { useState, useEffect } from "react";
+import { useAuth } from "@/contexts/AuthContext";
+import { useRouter } from "next/navigation";
+import ProfileHeader from "@/components/Profile/ProfileHeader";
+import AccountSettings from "@/components/Profile/AccountSettings";
+import DangerZone from "@/components/Profile/DangerZone";
+import OrderHistory from "@/components/Profile/OrderHistory";
+
+const ProfilePage = () => {
+  const { user, isLoading } = useAuth();
+  const router = useRouter();
+  const [email, setEmail] = useState("");
+
+  // Mock order history data, until integrated with backend
+  const [orderHistory] = useState([
+    {
+      id: "ORD-2024-001",
+      date: "2024-10-01",
+      total: 149.99,
+      status: "Delivered",
+      items: 3,
+      image:
+        "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400&h=400&fit=crop",
+    },
+    {
+      id: "ORD-2024-002",
+      date: "2024-09-28",
+      total: 89.5,
+      status: "Delivered",
+      items: 2,
+      image:
+        "https://images.unsplash.com/photo-1572635196237-14b3f281503f?w=400&h=400&fit=crop",
+    },
+    {
+      id: "ORD-2024-003",
+      date: "2024-09-15",
+      total: 299.99,
+      status: "Delivered",
+      items: 1,
+      image:
+        "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400&h=400&fit=crop",
+    },
+    {
+      id: "ORD-2024-004",
+      date: "2024-08-22",
+      total: 179.99,
+      status: "Delivered",
+      items: 4,
+      image:
+        "https://images.unsplash.com/photo-1560343090-f0409e92791a?w=400&h=400&fit=crop",
+    },
+  ]);
+
+  // Redirect based on authentication and role
+  useEffect(() => {
+    if (!isLoading) {
+      if (!user) {
+        router.push("/");
+      } else if (user.role === "Admin") {
+        router.push("/admin");
+      } else {
+        setEmail(user.email);
+      }
+    }
+  }, [user, isLoading, router]);
+
+  // Show a loading state or redirecting state
+  if (isLoading || !user || user.role === "Admin") {
+    return <div className="min-h-screen bg-[#1a1a1a]" />; 
+  }
+
+  return (
+    <div className="min-h-screen bg-[#171010] text-white">
+      <div className="max-w-6xl mx-auto px-4 py-12">
+        <ProfileHeader />
+        <AccountSettings email={email} setEmail={setEmail} />
+        <DangerZone />
+        <OrderHistory orders={orderHistory} />
+      </div>
+    </div>
+  );
+};
 
 export default ProfilePage;

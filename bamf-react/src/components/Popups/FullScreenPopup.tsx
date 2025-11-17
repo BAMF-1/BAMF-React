@@ -1,0 +1,47 @@
+import React, { useEffect } from "react";
+
+type FullScreenPopupProps = {
+    open: boolean;
+    onClose: () => void;
+    childSize?: ChildSize; // made optional (defaults applied in component)
+    children?: React.ReactNode;
+};
+
+type ChildSize = {
+    width: string;
+    height: string;
+};
+
+export default function FullScreenPopup({ open, onClose, childSize = { width: 'w-[35rem]', height: 'h-fit' }, children }: FullScreenPopupProps) {
+    useEffect(() => {
+        const originalOverflow = document.body.style.overflow;
+        document.body.style.overflow = open ? "hidden" : originalOverflow;
+        return () => {
+            document.body.style.overflow = originalOverflow;
+        };
+    }, [open]);
+
+    if (!open) return null;
+
+    return (
+        <div
+            className="fixed inset-0 w-screen h-screen z-[999] flex items-center justify-center"
+            aria-modal="true"
+            role="dialog"
+        >
+            {/* Backdrop */}
+            <div
+                className="absolute inset-0 bg-black/50 backdrop-blur-sm cursor-pointer"
+                onClick={onClose}
+            />
+
+            {/* Modal content */}
+            <div
+                className={`relative z-[1000] pointer-events-auto flex justify-center items-center ${childSize.width} ${childSize.height}`}
+                onClick={(e) => e.stopPropagation()}
+            >
+                {children}
+            </div>
+        </div>
+    );
+}

@@ -1,13 +1,11 @@
-// the admin dashboard
+"use client";
+import AdminPanel from '@/components/admin/AdminPanel';
+import { withAuth } from '@/contexts/AuthContext';
 
-// todo - import actual admin components here later
+// Protect the admin panel so only authenticated admins can access it.
+// The HOC shows a loader while checking auth and redirects non-admins.
+function AdminPage() {
+  return <AdminPanel />;
+}
 
-const AdminPage = () => (
-  <main className="flex min-h-screen items-center justify-center">
-    <h1 className="text-2xl font-semibold text-gray-500">
-      Page in development 🚧
-    </h1>
-  </main>
-);
-
-export default AdminPage;
+export default withAuth(AdminPage, true);
