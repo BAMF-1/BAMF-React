@@ -28,7 +28,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: node-app
-          path: bamf-react/.next
+          path: bamf-react
 
   deploy:
     runs-on: ubuntu-latest
@@ -53,3 +53,4 @@ jobs:
           app-name: "BAMF-GEAR"
           slot-name: "Production"
           package: .
+
