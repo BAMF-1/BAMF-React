@@ -9,7 +9,8 @@ async function getData() {
 
 export default async function Home() {
   //TODO: Fetch real data here
-  await getData();
+  //? Didn't happen, but might still be needed later
+  /* await getData(); */
 
   return <HomePage />;
 }
