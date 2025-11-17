@@ -1,7 +1,7 @@
 import { notFound } from 'next/navigation';
 import Breadcrumbs from '@/components/Breadcrumbs';
 import VariantSelector from '@/components/VariantSelector';
-import { fetchCategories, fetchGroupDetail } from '@/lib/api-client';
+import { fetchCategories, fetchGroupDetail, GroupDetail } from '@/lib/api-client';
 import OpenAiPopup from './openAiPopup';
 import ProductReviews from './productReviews';
 
@@ -31,6 +31,31 @@ export default async function ProductPage({ params, searchParams }: Props) {
     notFound();
   }
 
+  // Mapping function
+  function mapGroupDetailToVariantSelector(groupDetail: GroupDetail) {
+    return {
+      name: groupDetail.name,
+      groupSlug: groupDetail.groupSlug || '',
+      variants: groupDetail.variants.map(v => ({
+        sku: v.sku,
+        color: v.color,
+        size: v.size,
+        price: v.price,
+        inStock: v.inStock,
+        images: v.primaryImageUrl
+          ? [{ url: v.primaryImageUrl, isPrimary: true, sortOrder: 0 }]
+          : [],
+        description: null,
+        brand: null,
+        material: null,
+      })),
+      facets: {
+        colors: groupDetail.facets.colors,
+        sizes: groupDetail.facets.sizes,
+      },
+    };
+  }
+
   const categories = await fetchCategories();
   const cat = categories.find(c => c.slug === categorySlug);
 
@@ -46,9 +71,9 @@ export default async function ProductPage({ params, searchParams }: Props) {
           ]}
         />
         <div className="mt-8">
-          <VariantSelector group={group} initialSku={sku} />
+          <VariantSelector group={mapGroupDetailToVariantSelector(group)} initialSku={sku} />
         </div>
-        
+
         <ProductReviews groupSlug={group.groupSlug} />
 
         <div className="ai-popup ">
