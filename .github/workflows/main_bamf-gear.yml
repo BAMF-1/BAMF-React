@@ -13,42 +13,78 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-latest
-
+    
     steps:
       - uses: actions/checkout@v4
-
-      - name: Zip artifact for deployment
+      
+      - name: Set up Node.js version
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20.x'
+          
+      - name: npm install and build
+        working-directory: ./bamf-react
         run: |
-          cd bamf-react
-          zip -r ../release.zip . -x "*.git*" -x "node_modules/*" -x ".next/*"
-
+          npm ci
+          npm run build
+          
+      - name: Create node_modules archive
+        working-directory: ./bamf-react
+        run: |
+          # Create tar.gz of node_modules for Azure's extraction process
+          tar -czf node_modules.tar.gz node_modules/
+          
+      - name: Prepare deployment package
+        working-directory: ./bamf-react
+        run: |
+          # Create deployment directory
+          mkdir -p ../deploy
+          
+          # Copy built files
+          cp -r .next ../deploy/
+          cp node_modules.tar.gz ../deploy/
+          cp package.json ../deploy/
+          cp package-lock.json ../deploy/
+          
+          # Copy config files if they exist
+          [ -f next.config.js ] && cp next.config.js ../deploy/ || true
+          [ -f next.config.mjs ] && cp next.config.mjs ../deploy/ || true
+          [ -f next.config.ts ] && cp next.config.ts ../deploy/ || true
+          
+          # Copy public folder if it exists
+          [ -d public ] && cp -r public ../deploy/ || true
+          
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
         with:
           name: node-app
-          path: release.zip
+          path: deploy/
 
   deploy:
     runs-on: ubuntu-latest
     needs: build
+    environment:
+      name: 'Production'
+      url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
     
     steps:
       - name: Download artifact from build job
         uses: actions/download-artifact@v4
         with:
           name: node-app
-
+          path: .
+          
       - name: Login to Azure
         uses: azure/login@v2
         with:
           client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID }}
           tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID }}
           subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID }}
-
+          
       - name: 'Deploy to Azure Web App'
         uses: azure/webapps-deploy@v3
         id: deploy-to-webapp
         with:
           app-name: 'BAMF-GEAR'
           slot-name: 'Production'
-          package: release.zip
+          package: .
