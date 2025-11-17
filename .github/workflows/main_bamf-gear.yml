@@ -1,5 +1,4 @@
 name: Build and deploy Node.js app to Azure Web App - BAMF-GEAR
-
 on:
   push:
     branches:
@@ -22,37 +21,15 @@ jobs:
         with:
           node-version: '20.x'
           
-      - name: npm install and build
-        working-directory: ./bamf-react
-        run: |
-          npm ci
-          npm run build
-          
-      - name: Create node_modules archive
-        working-directory: ./bamf-react
-        run: |
-          # Create tar.gz of node_modules for Azure's extraction process
-          tar -czf node_modules.tar.gz node_modules/
-          
       - name: Prepare deployment package
         working-directory: ./bamf-react
         run: |
-          # Create deployment directory
+          # Remove node_modules and build artifacts to let Azure build
+          rm -rf node_modules .next
+          
+          # Create deployment directory with source files
           mkdir -p ../deploy
-          
-          # Copy built files
-          cp -r .next ../deploy/
-          cp node_modules.tar.gz ../deploy/
-          cp package.json ../deploy/
-          cp package-lock.json ../deploy/
-          
-          # Copy config files if they exist
-          [ -f next.config.js ] && cp next.config.js ../deploy/ || true
-          [ -f next.config.mjs ] && cp next.config.mjs ../deploy/ || true
-          [ -f next.config.ts ] && cp next.config.ts ../deploy/ || true
-          
-          # Copy public folder if it exists
-          [ -d public ] && cp -r public ../deploy/ || true
+          cp -r . ../deploy/
           
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
