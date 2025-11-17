@@ -25,19 +25,35 @@ jobs:
       - name: npm install and build
         working-directory: ./bamf-react
         run: |
-          npm install
-          npm run build --if-present
+          npm ci
+          # Build without turbopack for production (more stable for deployment)
+          npm run build -- --no-turbopack
 
-      - name: Zip artifact for deployment
+      - name: Create deployment package
         working-directory: ./bamf-react
         run: |
-          zip -r ../release.zip .next node_modules package.json package-lock.json next.config.* public
+          # Create a clean deployment directory
+          mkdir -p ../deploy
+          
+          # Copy necessary files
+          cp -r .next ../deploy/
+          cp -r node_modules ../deploy/
+          cp package.json ../deploy/
+          cp package-lock.json ../deploy/
+          
+          # Copy next.config if it exists
+          if [ -f next.config.js ]; then cp next.config.js ../deploy/; fi
+          if [ -f next.config.mjs ]; then cp next.config.mjs ../deploy/; fi
+          if [ -f next.config.ts ]; then cp next.config.ts ../deploy/; fi
+          
+          # Copy public folder if it exists
+          if [ -d public ]; then cp -r public ../deploy/; fi
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
         with:
           name: node-app
-          path: release.zip
+          path: deploy/
 
   deploy:
     runs-on: ubuntu-latest
@@ -48,9 +64,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: node-app
-
-      - name: Unzip artifact for deployment
-        run: unzip release.zip
+          path: .
 
       - name: Login to Azure
         uses: azure/login@v2
