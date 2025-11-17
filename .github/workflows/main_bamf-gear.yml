@@ -5,7 +5,11 @@ on:
     branches:
       - main
   workflow_dispatch:
-
+  
+permissions:
+  id-token: write
+  contents: read
+  
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -53,5 +57,6 @@ jobs:
           app-name: "BAMF-GEAR"
           slot-name: "Production"
           package: .
+
 
 
