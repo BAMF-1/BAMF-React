@@ -16,20 +16,20 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       
-      - name: Set up Node.js version
-        uses: actions/setup-node@v3
-        with:
-          node-version: '20.x'
-          
       - name: Prepare deployment package
         working-directory: ./bamf-react
         run: |
-          # Remove node_modules and build artifacts to let Azure build
-          rm -rf node_modules .next
+          # Remove any existing build artifacts
+          rm -rf node_modules .next node_modules.tar.gz
           
-          # Create deployment directory with source files
+          # Create clean deployment directory
           mkdir -p ../deploy
+          
+          # Copy all source files
           cp -r . ../deploy/
+          
+          # Remove any artifacts that might have been copied
+          rm -rf ../deploy/node_modules ../deploy/.next ../deploy/node_modules.tar.gz
           
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
