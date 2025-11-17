@@ -1,4 +1,4 @@
-name: Build and deploy Node.js app to Azure Web App -- BAMF-GEAR
+name: Build and deploy Node.js app to Azure Web App - BAMF-GEAR
 
 on:
   push:
@@ -57,3 +57,4 @@ jobs:
           app-name: "BAMF-GEAR"
           slot-name: "Production"
           package: .
+
