@@ -1,8 +1,10 @@
+"use client";
 import { useState } from "react";
 import CartDrawer from "./CartDrawer";
+import { useCart } from "@/contexts/CartContext";
 
 export default function CartButton() {
-    const [cartCount] = useState(6);
+    const { totalItems } = useCart();
     const [isOpen, setIsOpen] = useState(false);
 
     return (
@@ -28,12 +30,12 @@ export default function CartButton() {
                     🛒
                     <span className="tracking-wider">CART</span>
                 </span>
-                {cartCount > 0 && (
+                {totalItems > 0 && (
                     <span
                         className="absolute -top-2 -right-2 w-6 h-6 flex items-center justify-center text-xs font-bold text-white rounded-full animate-pulse"
                         style={{ backgroundColor: "#8B4545" }}
                     >
-                        {cartCount}
+                        {totalItems}
                     </span>
                 )}
                 <span
@@ -41,7 +43,6 @@ export default function CartButton() {
                     style={{ backgroundColor: "rgba(139, 69, 69, 0.2)" }}
                 />
             </button>
-
             {/* Cart Drawer */}
             <CartDrawer isOpen={isOpen} onClose={() => setIsOpen(false)} />
         </div>

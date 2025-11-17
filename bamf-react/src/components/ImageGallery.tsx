@@ -32,8 +32,14 @@ export default function ImageGallery({ images, productName }: ImageGalleryProps)
   if (!images || images.length === 0) {
     return (
       <div className="w-full">
-        <div className="relative aspect-square w-full bg-gray-900 rounded-lg flex items-center justify-center">
-          <span className="text-gray-500 text-lg">No Image Available</span>
+        <div style={{ backgroundColor: "rgb(43, 43, 43)" }} className="relative aspect-square w-full rounded-lg flex items-center justify-center">
+          <Image
+            src="/no-image-available.png"
+            alt="No Image Available"
+            fill
+            className="invert object-contain"
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 40vw"
+          />
         </div>
       </div>
     );
@@ -73,11 +79,10 @@ export default function ImageGallery({ images, productName }: ImageGalleryProps)
             <button
               key={`${img.url}-${index}`}
               onClick={() => setSelectedImage(img.url)}
-              className={`relative w-20 h-20 flex-shrink-0 rounded-lg border-2 overflow-hidden transition-all ${
-                selectedImage === img.url
-                  ? 'border-white ring-2 ring-white/50'
-                  : 'border-gray-600 hover:border-gray-400'
-              }`}
+              className={`relative w-20 h-20 flex-shrink-0 rounded-lg border-2 overflow-hidden transition-all ${selectedImage === img.url
+                ? 'border-white ring-2 ring-white/50'
+                : 'border-gray-600 hover:border-gray-400'
+                }`}
               aria-label={img.altText || `View image ${index + 1}`}
             >
               <Image

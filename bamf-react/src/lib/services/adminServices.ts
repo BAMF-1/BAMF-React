@@ -17,12 +17,13 @@ export interface User {
 
 export interface Review {
     id: number;
-    productId: number;
+    productGroupId: string; // changed from productId
     rating: number;
     title: string;
     comment: string;
     createdUtc: string;
-    updatedUtc?: string;
+    updatedUtc?: string | null;
+    productGroup?: ProductGroup; // nested object
 }
 
 export interface Item {
@@ -73,6 +74,20 @@ export interface Variant {
     description?: string;
     brand?: string;
     material?: string;
+}
+
+export interface ProductGroup {
+    id: string;
+    name: string;
+    slug?: string;
+    objectId?: string;
+    isDeleted?: boolean;
+    category?: Category | null;
+    categoryId?: string;
+    createdAt?: string;
+    updatedAt?: string;
+    variants?: any[]; // can be typed more specifically if needed
+    colorImages?: any[]; // can be typed more specifically if needed
 }
 
 export interface Group {
@@ -130,6 +145,8 @@ export const reviewService = {
     getById: (id: number) => apiClient.get<Review>(`/api/Reviews/${id}`),
     getByProduct: (productId: number) =>
         apiClient.get<Review[]>(`/api/Reviews/product/${productId}`),
+    getByGroup: (groupSlug: string) =>
+        apiClient.get<Review[]>(`/api/Reviews/product-group/${encodeURIComponent(groupSlug)}`), //https://localhost:7039/api/Reviews/product-group/sport-cap-classic'
     create: (productId: number, rating: number, title: string, comment: string) =>
         apiClient.post<Review>(`/api/Reviews`, { productId, rating, title, comment }),
     update: (id: number, rating?: number, title?: string, comment?: string) => {
@@ -299,4 +316,8 @@ export const categoryService = {
     getAllCount: () => apiClient.get<number>('/api/Categories/count'),
 };
 
-
+// ========== OpenAI Service ==========
+export const openAIService = {
+    summarizeReviews: (slug: string) =>
+        apiClient.get<string>(`/api/OpenAi/summarize/${encodeURIComponent(slug)}`),
+};

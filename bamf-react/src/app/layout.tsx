@@ -6,6 +6,7 @@ import Footer from "@/components/footer";
 import "./globals.css";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { Bounce, ToastContainer } from "react-toastify";
+import { CartProvider } from "@/contexts/CartContext";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -34,23 +35,25 @@ export default function RootLayout({
         style={{ backgroundColor: "#171010" }}
       >
         <AuthProvider>
-          <div id="blurOverlay" className="fixed w-full h-full backdrop-blur-sm z-25 hidden" />
-          <Navbar />
-          {children}
-          <Footer />
-          <ToastContainer
-            position="top-left"
-            autoClose={5000}
-            hideProgressBar={false}
-            newestOnTop={false}
-            closeOnClick={false}
-            rtl={false}
-            pauseOnFocusLoss
-            draggable
-            pauseOnHover
-            theme="light"
-            transition={Bounce}
-          />
+          <CartProvider>
+            <div id="blurOverlay" className="fixed w-full h-full backdrop-blur-sm z-25 hidden" />
+            <Navbar />
+            {children}
+            <Footer />
+            <ToastContainer
+              position="top-left"
+              autoClose={5000}
+              hideProgressBar={false}
+              newestOnTop={false}
+              closeOnClick={false}
+              rtl={false}
+              pauseOnFocusLoss
+              draggable
+              pauseOnHover
+              theme="light"
+              transition={Bounce}
+            />
+          </CartProvider>
         </AuthProvider>
       </body>
     </html>

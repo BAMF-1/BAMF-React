@@ -2,6 +2,8 @@ import { notFound } from 'next/navigation';
 import Breadcrumbs from '@/components/Breadcrumbs';
 import VariantSelector from '@/components/VariantSelector';
 import { fetchCategories, fetchGroupDetail } from '@/lib/api-client';
+import OpenAiPopup from './openAiPopup';
+import ProductReviews from './productReviews';
 
 type Props = {
   params: Promise<{ category: string; product: string }>;
@@ -45,6 +47,12 @@ export default async function ProductPage({ params, searchParams }: Props) {
         />
         <div className="mt-8">
           <VariantSelector group={group} initialSku={sku} />
+        </div>
+        
+        <ProductReviews groupSlug={group.groupSlug} />
+
+        <div className="ai-popup ">
+          <OpenAiPopup groupSlug={group.groupSlug} />
         </div>
       </div>
     </div>

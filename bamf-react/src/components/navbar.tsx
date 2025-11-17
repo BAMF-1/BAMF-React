@@ -34,11 +34,6 @@ export default function Navbar() {
                             <span className="absolute -bottom-1 left-0 w-0 h-0.5 transition-all group-hover:w-full"
                                 style={{ backgroundColor: "#362222" }}></span>
                         </Link>
-                        <Link href="/collections" className="relative text-gray-300 transition-colors hover:text-white group">
-                            COLLECTIONS
-                            <span className="absolute -bottom-1 left-0 w-0 h-0.5 transition-all group-hover:w-full"
-                                style={{ backgroundColor: "#362222" }}></span>
-                        </Link>
                         <Link href="/about" className="relative text-gray-300 transition-colors hover:text-white group">
                             ABOUT
                             <span className="absolute -bottom-1 left-0 w-0 h-0.5 transition-all group-hover:w-full"

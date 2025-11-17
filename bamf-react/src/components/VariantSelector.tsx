@@ -2,14 +2,16 @@
 
 import { useMemo, useState } from 'react';
 import ImageGallery from './ImageGallery';
+import { useCart } from '@/contexts/CartContext';
 
 interface VariantSelectorProps {
   group: {
     name: string;
+    groupSlug: string;
     variants: Array<{
       sku: string;
-      color?: string | null;  // ✅ Make optional
-      size?: string | null;   // ✅ Make optional
+      color?: string | null;
+      size?: string | null;
       price: number;
       inStock: boolean;
       description?: string | null;
@@ -23,14 +25,17 @@ interface VariantSelectorProps {
       }>;
     }>;
     facets: {
-      colors?: Array<{ value: string; count: number }>;  // ✅ Make optional
-      sizes?: Array<{ value: string; count: number }>;   // ✅ Make optional
+      colors?: Array<{ value: string; count: number }>;
+      sizes?: Array<{ value: string; count: number }>;
     };
   };
   initialSku?: string;
 }
 
 export default function VariantSelector({ group, initialSku }: VariantSelectorProps) {
+  const { addItem } = useCart();
+  const [showAddedMessage, setShowAddedMessage] = useState(false);
+
   // Find initial variant
   const initialVariant = initialSku
     ? group.variants.find(v => v.sku === initialSku)
@@ -39,7 +44,7 @@ export default function VariantSelector({ group, initialSku }: VariantSelectorPr
   const [color, setColor] = useState(initialVariant?.color || '');
   const [size, setSize] = useState(initialVariant?.size || '');
 
-  // Get available colors and sizes (handle undefined facets)
+  // Get available colors and sizes
   const colorsAvailable = group.facets?.colors?.map(c => c.value) || [];
   const sizesAvailable = group.facets?.sizes?.map(s => s.value) || [];
 
@@ -50,7 +55,7 @@ export default function VariantSelector({ group, initialSku }: VariantSelectorPr
       group.variants
         .filter(v => v.size === size)
         .map(v => v.color)
-        .filter((c): c is string => c != null)  // ✅ Filter out nulls
+        .filter((c): c is string => c != null)
     );
   }, [size, group.variants, colorsAvailable]);
 
@@ -61,7 +66,7 @@ export default function VariantSelector({ group, initialSku }: VariantSelectorPr
       group.variants
         .filter(v => v.color === color)
         .map(v => v.size)
-        .filter((s): s is string => s != null)  // ✅ Filter out nulls
+        .filter((s): s is string => s != null)
     );
   }, [color, group.variants, sizesAvailable]);
 
@@ -70,7 +75,7 @@ export default function VariantSelector({ group, initialSku }: VariantSelectorPr
     return group.variants.find(v => v.color === color && v.size === size);
   }, [color, size, group.variants]);
 
-  // Get images for current variant (based on color)
+  // Get images for current variant
   const currentImages = useMemo(() => {
     if (!resolved || !resolved.images) return [];
     return resolved.images;
@@ -82,6 +87,24 @@ export default function VariantSelector({ group, initialSku }: VariantSelectorPr
     : group.variants.length > 0
       ? `From $${Math.min(...group.variants.map(v => v.price)).toFixed(2)}`
       : 'N/A';
+
+  const handleAddToCart = () => {
+    if (!resolved || !resolved.inStock) return;
+
+    addItem({
+      sku: resolved.sku,
+      name: group.name,
+      color: resolved.color || undefined,
+      size: resolved.size || undefined,
+      price: resolved.price,
+      image: resolved.images?.[0]?.url,
+      groupSlug: group.groupSlug
+    });
+
+    // Show success message
+    setShowAddedMessage(true);
+    setTimeout(() => setShowAddedMessage(false), 2000);
+  };
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
@@ -201,21 +224,32 @@ export default function VariantSelector({ group, initialSku }: VariantSelectorPr
 
         {/* Add to Cart Button */}
         {resolved && (
-          <button
-            disabled={!resolved.inStock}
-            className="w-full py-4 font-bold text-base tracking-widest transition-all uppercase"
-            style={{
-              backgroundColor: resolved.inStock ? '#362222' : '#1a1a1a',
-              color: resolved.inStock ? 'white' : '#4a4a4a',
-              borderWidth: '2px',
-              borderColor: resolved.inStock ? '#423F3E' : '#2B2B2B',
-              cursor: resolved.inStock ? 'pointer' : 'not-allowed'
-            }}
-            onMouseEnter={(e) => resolved.inStock && (e.currentTarget.style.backgroundColor = '#423F3E')}
-            onMouseLeave={(e) => resolved.inStock && (e.currentTarget.style.backgroundColor = '#362222')}
-          >
-            {resolved.inStock ? 'Add to Cart' : 'Out of Stock'}
-          </button>
+          <div className="relative">
+            <button
+              disabled={!resolved.inStock}
+              onClick={handleAddToCart}
+              className="w-full py-4 font-bold text-base tracking-widest transition-all uppercase"
+              style={{
+                backgroundColor: resolved.inStock ? '#362222' : '#1a1a1a',
+                color: resolved.inStock ? 'white' : '#4a4a4a',
+                borderWidth: '2px',
+                borderColor: resolved.inStock ? '#423F3E' : '#2B2B2B',
+                cursor: resolved.inStock ? 'pointer' : 'not-allowed'
+              }}
+              onMouseEnter={(e) => resolved.inStock && (e.currentTarget.style.backgroundColor = '#423F3E')}
+              onMouseLeave={(e) => resolved.inStock && (e.currentTarget.style.backgroundColor = '#362222')}
+            >
+              {resolved.inStock ? 'Add to Cart' : 'Out of Stock'}
+            </button>
+
+            {/* Success Message */}
+            {showAddedMessage && (
+              <div className="absolute top-full left-0 right-0 mt-2 py-2 px-4 text-center text-sm font-bold text-white rounded"
+                style={{ backgroundColor: '#8B4545' }}>
+                ✓ Added to cart!
+              </div>
+            )}
+          </div>
         )}
 
         {/* SKU Display */}
