@@ -5,18 +5,21 @@ import ProductCard from '@/components/ProductCard';
 import { fetchCategories, fetchCategoryListing, groupVariantsToProducts } from '@/lib/api-client';
 
 type Props = {
-  params: { category: string };
-  searchParams: { [k: string]: string | string[] | undefined };
+  params: Promise<{ category: string }>;
+  searchParams: Promise<{ [k: string]: string | string[] | undefined }>;
 };
 
-export async function generateMetadata({ params }: Props) {
+export async function generateMetadata(props: Props) {
+  const params = await props.params;
   const title = `${decodeURIComponent(params.category)} • Shop`;
   return { title };
 }
 
-export default async function CategoryPage({ params, searchParams }: Props) {
-  const categorySlug = decodeURIComponent(params.category);
+export default async function CategoryPage(props: Props) {
+  const params = await props.params;
+  const searchParams = await props.searchParams;
 
+  const categorySlug = decodeURIComponent(params.category);
   const [categories, rows] = await Promise.all([
     fetchCategories(),
     fetchCategoryListing({
@@ -43,6 +46,7 @@ export default async function CategoryPage({ params, searchParams }: Props) {
   const availableColors = Array.from(
     new Set(rows.map((r) => r.color).filter((x): x is string => !!x))
   ).sort((a, b) => a.localeCompare(b));
+
   const availableSizes = Array.from(
     new Set(rows.map((r) => r.size).filter((x): x is string => !!x))
   ).sort((a, b) => a.localeCompare(b, undefined, { numeric: true }));
@@ -56,15 +60,12 @@ export default async function CategoryPage({ params, searchParams }: Props) {
           { label: category?.name || categorySlug },
         ]}
       />
-
       <div className="flex items-end justify-between gap-4 mb-6">
         <h1 className="text-5xl md:text-6xl font-bold text-white tracking-tight uppercase">{category?.name || categorySlug}</h1>
         <div className="text-sm text-gray-400 font-medium">{grouped.length} product{grouped.length === 1 ? '' : 's'}</div>
       </div>
-
       <div className="grid grid-cols-1 md:grid-cols-[260px,1fr] gap-8">
         <ListingFilters availableColors={availableColors} availableSizes={availableSizes} />
-
         <section>
           {grouped.length === 0 ? (
             <div className="text-gray-300 text-lg">No products match your filters. Try clearing some options.</div>
