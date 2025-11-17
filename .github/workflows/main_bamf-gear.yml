@@ -26,8 +26,8 @@ jobs:
         working-directory: ./bamf-react
         run: |
           npm ci
-          # Build without turbopack for production (more stable for deployment)
-          npm run build -- --no-turbopack
+          # Override the build script to use standard webpack build
+          npx next build
 
       - name: Create deployment package
         working-directory: ./bamf-react
