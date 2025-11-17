@@ -17,32 +17,40 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Setup Node
+      - name: Set up Node.js version
         uses: actions/setup-node@v3
         with:
-          node-version: 20
+          node-version: '20.x'
 
-      - name: Install and build
+      - name: npm install and build
+        working-directory: ./bamf-react
         run: |
-          cd bamf-react
-          npm ci
-          npm run build
+          npm install
+          npm run build --if-present
 
-      - name: Upload Next.js build artifact
+      - name: Zip artifact for deployment
+        working-directory: ./bamf-react
+        run: |
+          zip -r ../release.zip .next node_modules package.json package-lock.json next.config.* public
+
+      - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
         with:
           name: node-app
-          path: bamf-react
+          path: release.zip
 
   deploy:
     runs-on: ubuntu-latest
     needs: build
-
+    
     steps:
-      - name: Download build artifact
+      - name: Download artifact from build job
         uses: actions/download-artifact@v4
         with:
           name: node-app
+
+      - name: Unzip artifact for deployment
+        run: unzip release.zip
 
       - name: Login to Azure
         uses: azure/login@v2
@@ -51,10 +59,10 @@ jobs:
           tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID }}
           subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID }}
 
-      - name: Deploy to Azure Web App
+      - name: 'Deploy to Azure Web App'
         uses: azure/webapps-deploy@v3
+        id: deploy-to-webapp
         with:
-          app-name: "BAMF-GEAR"
-          slot-name: "Production"
+          app-name: 'BAMF-GEAR'
+          slot-name: 'Production'
           package: .
-
