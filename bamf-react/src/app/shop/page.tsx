@@ -93,7 +93,7 @@ export default function ShopLanding() {
       <main className="container mx-auto px-4 py-8" style={{ backgroundColor: '#171010', minHeight: '100vh' }}>
         <div className="text-center py-12">
           <p className="text-gray-300 mb-4">Backend API is not available. Please start the backend server.</p>
-          <p className="text-sm text-gray-400">Expected API at: https://localhost:7039</p>
+          <p className="text-sm text-gray-400">Expected API at: {process.env.NEXT_PUBLIC_API_URL || '"Backend URL"'}</p>
         </div>
       </main>
     );
