@@ -36,7 +36,12 @@ export default function VariantsManagement() {
     const [formData, setFormData] = useState<Partial<VariantWithMetadata>>({});
     const [showInventoryModal, setShowInventoryModal] = useState(false);
     const [inventoryAdjustment, setInventoryAdjustment] = useState<{ variantId: string; amount: number; transactionType: number } | null>(null);
-    
+
+    // Groups pagination state
+    const [groupsPage, setGroupsPage] = useState(1);
+    const [groupsTotalCount, setGroupsTotalCount] = useState(0);
+    const [isLoadingMoreGroups, setIsLoadingMoreGroups] = useState(false);
+
     // Image management state
     const [imageFormList, setImageFormList] = useState<ImageFormData[]>([]);
     const [existingImages, setExistingImages] = useState<VariantImage[]>([]);
@@ -51,18 +56,48 @@ export default function VariantsManagement() {
         }
     }, [selectedGroupId]);
 
-    const loadGroups = async () => {
+    const loadGroups = async (reset = true, pageNum = 1) => {
+        if (reset) {
+            setIsLoadingMoreGroups(true);
+        }
         try {
-            const response = await groupService.getAll();
-            const groupsData = response.data || [];
-            setGroups(groupsData);
+            // Assuming groupService has getAll with pagination support
+            // If not, you may need to add pagination parameters
+            const [response, countResponse] = await Promise.all([
+                groupService.getAll(pageNum),
+                groupService.getAllCount ? groupService.getAllCount() : Promise.resolve({ data: 0 })
+            ]);
 
-            if (groupsData.length > 0 && !selectedGroupId) {
+            const groupsData = response.data || [];
+
+            if (reset) {
+                setGroups(groupsData);
+            } else {
+                setGroups(prev => [...prev, ...groupsData]);
+            }
+
+            // Handle count response
+            const count = typeof countResponse.data === 'object' && countResponse.data !== null && 'count' in countResponse.data
+                ? (countResponse.data as any).count
+                : countResponse.data || groupsData.length;
+            setGroupsTotalCount(count);
+
+            if (groupsData.length > 0 && !selectedGroupId && reset) {
                 setSelectedGroupId(groupsData[0].id);
             }
         } catch (error) {
             console.error('Error loading groups:', error);
+            toast.error('Failed to load groups');
+        } finally {
+            setIsLoadingMoreGroups(false);
         }
+    };
+
+    const handleLoadMoreGroups = async () => {
+        setIsLoadingMoreGroups(true);
+        const nextPage = groupsPage + 1;
+        setGroupsPage(nextPage);
+        await loadGroups(false, nextPage);
     };
 
     const loadVariants = async (groupId: number | string, reset = true, pageNum = 1) => {
@@ -125,7 +160,7 @@ export default function VariantsManagement() {
 
     const handleEdit = async (item: VariantWithMetadata) => {
         setFormData(item);
-        
+
         // Load existing images for this variant
         try {
             const response = await variantImageService.getByVariant(item.id);
@@ -135,7 +170,7 @@ export default function VariantsManagement() {
         } catch (error) {
             console.error('Error loading variant images:', error);
         }
-        
+
         // Clear new images form
         setImageFormList([]);
     };
@@ -191,7 +226,7 @@ export default function VariantsManagement() {
                     console.error('Unexpected response structure:', response);
                     return;
                 }
-                
+
                 toast.success('Variant created successfully');
             }
 
@@ -212,7 +247,7 @@ export default function VariantsManagement() {
             if (selectedGroupId) {
                 await loadVariants(selectedGroupId);
             }
-            
+
             // Clear form and close
             onClose();
             setFormData({});
@@ -256,7 +291,7 @@ export default function VariantsManagement() {
         setImageFormList([...imageFormList, {
             url: '',
             altText: '',
-            isPrimary: imageFormList.length === 0 && existingImages.length === 0, // First image is primary by default
+            isPrimary: imageFormList.length === 0 && existingImages.length === 0,
             sortOrder: imageFormList.length + existingImages.length
         }]);
     };
@@ -268,20 +303,20 @@ export default function VariantsManagement() {
     const updateImageField = (index: number, field: keyof ImageFormData, value: any) => {
         const updated = [...imageFormList];
         updated[index] = { ...updated[index], [field]: value };
-        
+
         // If marking as primary, unmark all others
         if (field === 'isPrimary' && value === true) {
             updated.forEach((img, i) => {
                 if (i !== index) img.isPrimary = false;
             });
         }
-        
+
         setImageFormList(updated);
     };
 
     const deleteExistingImage = async (imageId: string, variantId: string) => {
         if (!confirm('Are you sure you want to delete this image?')) return;
-        
+
         try {
             await variantImageService.delete(variantId, imageId);
             setExistingImages(existingImages.filter(img => img.id !== imageId));
@@ -359,6 +394,27 @@ export default function VariantsManagement() {
                             </option>
                         ))}
                     </select>
+
+                    {/* Load More Groups Button */}
+                    {groups.length < groupsTotalCount && (
+                        <button
+                            onClick={handleLoadMoreGroups}
+                            disabled={isLoadingMoreGroups}
+                            className="w-full mt-3 px-4 py-2.5 bg-[#3a3a3a] hover:bg-[#4a4a4a] text-white rounded-lg transition font-medium disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                        >
+                            {isLoadingMoreGroups ? (
+                                <>
+                                    <div className="h-4 w-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                                    Loading...
+                                </>
+                            ) : (
+                                <>
+                                    <Plus className="w-4 h-4" />
+                                    Load More Groups ({groups.length} of {groupsTotalCount})
+                                </>
+                            )}
+                        </button>
+                    )}
                 </div>
 
                 {selectedGroupId && (
@@ -404,7 +460,7 @@ export default function VariantsManagement() {
                                     <h3 className="text-lg font-semibold text-white border-b border-[#3a3a3a] pb-2">
                                         Basic Information
                                     </h3>
-                                    
+
                                     <FormField
                                         label="SKU"
                                         name="sku"
@@ -445,7 +501,7 @@ export default function VariantsManagement() {
                                     <h3 className="text-lg font-semibold text-white border-b border-[#3a3a3a] pb-2">
                                         Product Details (Optional)
                                     </h3>
-                                    
+
                                     <FormField
                                         label="Description"
                                         name="description"
@@ -494,9 +550,9 @@ export default function VariantsManagement() {
                                             {existingImages.map((img) => (
                                                 <div key={img.id} className="bg-[#1f1f1f] border border-[#3a3a3a] rounded-lg p-4">
                                                     <div className="flex gap-3">
-                                                        <img 
-                                                            src={img.url} 
-                                                            alt={img.altText || 'Product'} 
+                                                        <img
+                                                            src={img.url}
+                                                            alt={img.altText || 'Product'}
                                                             className="w-20 h-20 object-cover rounded"
                                                             onError={(e) => {
                                                                 e.currentTarget.src = '/placeholder.png';
@@ -547,7 +603,7 @@ export default function VariantsManagement() {
                                                             <X className="w-4 h-4" />
                                                         </button>
                                                     </div>
-                                                    
+
                                                     <FormField
                                                         label="Image URL"
                                                         name={`image-url-${index}`}
@@ -555,18 +611,18 @@ export default function VariantsManagement() {
                                                         onChange={(val) => updateImageField(index, 'url', val)}
                                                         placeholder="https://example.com/image.jpg"
                                                     />
-                                                    
+
                                                     {imageData.url && (
-                                                        <img 
-                                                            src={imageData.url} 
-                                                            alt="Preview" 
+                                                        <img
+                                                            src={imageData.url}
+                                                            alt="Preview"
                                                             className="w-full h-32 object-cover rounded"
                                                             onError={(e) => {
                                                                 e.currentTarget.src = '/placeholder.png';
                                                             }}
                                                         />
                                                     )}
-                                                    
+
                                                     <FormField
                                                         label="Alt Text"
                                                         name={`image-alt-${index}`}
@@ -574,7 +630,7 @@ export default function VariantsManagement() {
                                                         onChange={(val) => updateImageField(index, 'altText', val)}
                                                         placeholder="Description for accessibility"
                                                     />
-                                                    
+
                                                     <div className="flex items-center gap-4">
                                                         <label className="flex items-center gap-2 cursor-pointer">
                                                             <input
@@ -585,7 +641,7 @@ export default function VariantsManagement() {
                                                             />
                                                             <span className="text-sm text-gray-300">Primary Image</span>
                                                         </label>
-                                                        
+
                                                         <FormField
                                                             label="Sort Order"
                                                             name={`image-sort-${index}`}
