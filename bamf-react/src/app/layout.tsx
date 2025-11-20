@@ -7,6 +7,7 @@ import "./globals.css";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { Bounce, ToastContainer } from "react-toastify";
 import { CartProvider } from "@/contexts/CartContext";
+import { GoogleAnalytics } from "@next/third-parties/google";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -36,7 +37,10 @@ export default function RootLayout({
       >
         <AuthProvider>
           <CartProvider>
-            <div id="blurOverlay" className="fixed w-full h-full backdrop-blur-sm z-25 hidden" />
+            <div
+              id="blurOverlay"
+              className="fixed w-full h-full backdrop-blur-sm z-25 hidden"
+            />
             <Navbar />
             {children}
             <Footer />
@@ -55,6 +59,7 @@ export default function RootLayout({
             />
           </CartProvider>
         </AuthProvider>
+        <GoogleAnalytics gaId={process.env.NEXT_PUBLIC_GA_ID || ""} />
       </body>
     </html>
   );
