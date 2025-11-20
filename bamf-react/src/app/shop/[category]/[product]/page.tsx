@@ -1,9 +1,14 @@
-import { notFound } from 'next/navigation';
-import Breadcrumbs from '@/components/Breadcrumbs';
-import VariantSelector from '@/components/VariantSelector';
-import { fetchCategories, fetchGroupDetail, GroupDetail } from '@/lib/api-client';
-import OpenAiPopup from './openAiPopup';
-import ProductReviews from './productReviews';
+import { notFound } from "next/navigation";
+import Breadcrumbs from "@/components/Breadcrumbs";
+import VariantSelector from "@/components/VariantSelector";
+import ProductAnalytics from "@/components/ProductAnalytics";
+import {
+  fetchCategories,
+  fetchGroupDetail,
+  GroupDetail,
+} from "@/lib/api-client";
+import OpenAiPopup from "./openAiPopup";
+import ProductReviews from "./productReviews";
 
 type Props = {
   params: Promise<{ category: string; product: string }>;
@@ -12,7 +17,9 @@ type Props = {
 
 export async function generateMetadata({ params }: Props) {
   const resolvedParams = await params;
-  const title = `${decodeURIComponent(resolvedParams.product)} • ${decodeURIComponent(resolvedParams.category)} • Shop`;
+  const title = `${decodeURIComponent(
+    resolvedParams.product
+  )} • ${decodeURIComponent(resolvedParams.category)} • Shop`;
   return { title };
 }
 
@@ -35,8 +42,8 @@ export default async function ProductPage({ params, searchParams }: Props) {
   function mapGroupDetailToVariantSelector(groupDetail: GroupDetail) {
     return {
       name: groupDetail.name,
-      groupSlug: groupDetail.groupSlug || '',
-      variants: groupDetail.variants.map(v => ({
+      groupSlug: groupDetail.groupSlug || "",
+      variants: groupDetail.variants.map((v) => ({
         sku: v.sku,
         color: v.color,
         size: v.size,
@@ -57,21 +64,35 @@ export default async function ProductPage({ params, searchParams }: Props) {
   }
 
   const categories = await fetchCategories();
-  const cat = categories.find(c => c.slug === categorySlug);
+  const cat = categories.find((c) => c.slug === categorySlug);
 
   return (
-    <div className="min-h-screen text-white" style={{ backgroundColor: '#171010' }}>
+    <div
+      className="min-h-screen text-white"
+      style={{ backgroundColor: "#171010" }}
+    >
+      <ProductAnalytics
+        product={{
+          sku: sku || group.variants[0].sku,
+          name: group.name,
+          price: group.variants[0].price,
+          category: cat?.name || undefined,
+        }}
+      />
       <div className="container mx-auto px-4 py-8">
         <Breadcrumbs
           items={[
-            { label: 'Home', href: '/' },
-            { label: 'Shop', href: '/shop' },
+            { label: "Home", href: "/" },
+            { label: "Shop", href: "/shop" },
             { label: cat?.name || categorySlug, href: `/shop/${categorySlug}` },
-            { label: group.name }
+            { label: group.name },
           ]}
         />
         <div className="mt-8">
-          <VariantSelector group={mapGroupDetailToVariantSelector(group)} initialSku={sku} />
+          <VariantSelector
+            group={mapGroupDetailToVariantSelector(group)}
+            initialSku={sku}
+          />
         </div>
 
         <ProductReviews groupSlug={group.groupSlug} />
