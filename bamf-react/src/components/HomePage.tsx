@@ -1,52 +1,120 @@
+// HomePage.tsx
 "use client";
 
 import Link from "next/link";
 import Image from "next/image";
-import { useState } from "react";
-// At the top of your page.tsx
+import { useEffect, useState } from "react";
+import SplitText from "./SplitText";
+import AnimatedContent from "./AnimatedContent";
+import Waves from "./Waves";
+import FlowingMenu from "./FlowingMenu";
+import CurvedLoop from "./CurvedLoop";
+import { itemService } from "@/lib/services/adminServices";
+import ScrollStackSection from "./ScrollStackSection";
 
 export default function HomePage() {
     const [email, setEmail] = useState("");
 
-    const featuredProducts = [
-        { name: "Leather Jacket", price: "$249", image: "🧥" },
-        { name: "Studded Belt", price: "$45", image: "⛓️" },
-        { name: "Combat Boots", price: "$189", image: "🥾" },
-        { name: "Band Tee", price: "$35", image: "👕" },
+    const demoItems = [
+        { name: "Leather Biker Jacket", price: "$199", image: "https://picsum.photos/600/400?random=1", link: "/shop" },
+        { name: "Studded Belt", price: "$49", image: "https://picsum.photos/600/400?random=2", link: "/shop" },
+        { name: "Band T-Shirt", price: "$29", image: "https://picsum.photos/600/400?random=3", link: "/shop" },
+        { name: "Spiked Wristband", price: "$19", image: "https://picsum.photos/600/400?random=4", link: "/shop" },
     ];
+
+    const [featuredProducts, setFeaturedProducts] = useState<Array<{ link: string, name: string; price: string; image: string }>>(demoItems);
+
+    useEffect(() => {
+        const fetchFeaturedProducts = async () => {
+            try {
+                const response = await itemService.getAll(1, 4);
+                if (response && response.data && Array.isArray(response.data)) {
+                    const mappedProducts = response.data.map((item: any) => {
+                        const categorySlug = item.mainCategory.toLowerCase();
+
+                        const fullLink = `/shop/${categorySlug}/${item.slug}?sku=${item.sku}`;
+                        return {
+                            name: item.groupName,
+                            price: `$${item.price.toFixed(2)}`,
+                            image: item.primaryImageUrl,
+                            link: fullLink
+                        };
+                    });
+                    console.log("Mapped Products:", mappedProducts);
+                    setFeaturedProducts(mappedProducts);
+                } else {
+                    console.error("Unexpected data structure:", response);
+                }
+            } catch (error) {
+                console.error("Error fetching featured products:", error);
+            }
+        };
+        fetchFeaturedProducts();
+    }, []);
 
     return (
         <div className="min-h-screen" style={{ backgroundColor: "#171010" }}>
 
             {/* Hero Section */}
             <section
-                className="relative px-6 py-24 md:py-32 overflow-hidden"
+                className="h-[92.5vh] relative px-6 py-24 md:py-32 overflow-hidden"
                 style={{ backgroundColor: "#171010" }}
             >
                 <div className="max-w-7xl mx-auto relative z-10">
                     <div className="max-w-3xl">
-                        <h2 className="text-5xl md:text-7xl font-bold text-white mb-6 leading-tight">
-                            DEFY THE<br />ORDINARY
-                        </h2>
-                        <p className="text-xl text-white mb-8 max-w-xl p-4 rounded">
-                            Premium leather, metal, and attitude. For those who live on the edge and dress like they mean it.
-                        </p>
+                        <SplitText
+                            text="DEFY THE\nORDINARY"
+
+                            breakOn="\n"
+                            className="text-5xl md:text-7xl font-bold text-white mb-6 leading-tight"
+                            delay={100}
+                            duration={0.6}
+                            ease="power3.out"
+                            splitType="chars"
+                            from={{ opacity: 0, y: 40 }}
+                            to={{ opacity: 1, y: 0 }}
+                            threshold={0.1}
+                            rootMargin="-100px"
+                            textAlign="left"
+                        />
+                        <SplitText
+                            className="text-xl text-white mb-8 max-w-xl p-4 rounded"
+                            text="Premium leather, metal, and attitude. For those who live on the edge and dress like they mean it."
+                            textAlign="left"
+                            splitType="words"
+                            delay={125}
+                            duration={0.6}
+                            ease="power3.out"
+                            from={{ opacity: 0, y: 20 }}
+                            to={{ opacity: 1, y: 0 }}
+
+                        />
 
                         <div className="flex flex-col sm:flex-row gap-4">
-                            <Link
-                                href="/shop"
-                                className="px-8 py-4 text-white font-bold text-sm tracking-wider transition-all transform hover:scale-105 cursor-pointer text-center"
-                                style={{ backgroundColor: "#362222" }}
+                            <AnimatedContent
+                                delay={1.5}
+                                distance={25}
                             >
-                                SHOP NOW
-                            </Link>
-                            <Link
-                                href="/about"
-                                className="px-8 py-4 text-white font-medium text-sm tracking-wider border transition-colors cursor-pointer text-center hover:bg-[#2B2B2B]"
-                                style={{ borderColor: "#423F3E", backgroundColor: "transparent" }}
+                                <Link
+                                    href="/shop"
+                                    className="px-8 py-4 text-white font-bold text-sm tracking-wider transition-all transform hover:scale-105 cursor-pointer text-center"
+                                    style={{ backgroundColor: "#362222" }}
+                                >
+                                    SHOP NOW
+                                </Link>
+                            </AnimatedContent>
+                            <AnimatedContent
+                                delay={1.75}
+                                distance={25}
                             >
-                                ABOUT BAMF
-                            </Link>
+                                <Link
+                                    href="/about"
+                                    className="px-8 py-4 text-white font-medium text-sm tracking-wider border transition-colors cursor-pointer text-center hover:bg-[#2B2B2B]"
+                                    style={{ borderColor: "#423F3E", backgroundColor: "transparent" }}
+                                >
+                                    ABOUT BAMF
+                                </Link>
+                            </AnimatedContent>
                         </div>
                     </div>
                 </div>
@@ -69,78 +137,43 @@ export default function HomePage() {
             </section>
 
             {/* Featured Products */}
-            {/* //TODO: Use API Call to fetch */}
-            <section className="px-6 py-20" style={{ backgroundColor: "#2B2B2B" }}>
-                <div className="max-w-7xl mx-auto">
-                    <h3 className="text-3xl font-bold text-white mb-12 text-center">FEATURED PIECES</h3>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                        {featuredProducts.map((product, idx) => (
-                            <Link href={`/products/${product.name}`} key={idx} className="group cursor-pointer">
-                                <div className="group cursor-pointer">
-                                    <div className="aspect-square flex items-center justify-center text-6xl mb-4 border transition-all"
-                                        style={{ backgroundColor: "#171010", borderColor: "#362222" }}
-                                        onMouseEnter={(e) => e.currentTarget.style.borderColor = "#423F3E"}
-                                        onMouseLeave={(e) => e.currentTarget.style.borderColor = "#362222"}>
-                                        {product.image}
-                                    </div>
-                                    <h4 className="text-white font-medium mb-1">{product.name}</h4>
-                                    <p className="text-gray-400">{product.price}</p>
-                                </div>
-                            </Link>
-                        ))}
+            <section className="min-h-[92.5vh] relative" style={{ backgroundColor: "#2B2B2B" }}>
+                {/* Background DotGrid */}
+                <div className="absolute inset-0">
+                    <Waves
+                        lineColor="#171010"
+                        backgroundColor="rgba(255, 255, 255, 0.2)"
+                        waveSpeedX={0.02}
+                        waveSpeedY={0.01}
+                        waveAmpX={40}
+                        waveAmpY={20}
+                        friction={0.9}
+                        tension={0.01}
+                        maxCursorMove={0}
+                        xGap={12}
+                        yGap={36}
+                    />
+                </div>
+                <div className="relative z-10 h-[92.5vh] flex flex-col items-center w-full pt-12">
+                    <CurvedLoop
+                        marqueeText="FEATURED PRODUCTS ✦ FEATURED PRODUCTS ✦ FEATURED PRODUCTS ✦ FEATURED PRODUCTS ✦ "
+                        className="text-white text-lg font-semibold underline-offset-4"
+                        speed={.75}
+                        curveAmount={50}
+                    />
+                    <div className="flex-1 w-full flex flex-col">
+                        <FlowingMenu
+                            items={featuredProducts.map((item) => ({
+                                ...item,
+                                text: item.name,
+                            }))}
+                        />
                     </div>
                 </div>
             </section>
 
             {/* Categories */}
-            <section className="px-6 py-20" style={{ backgroundColor: "#171010" }}>
-                <div className="max-w-7xl mx-auto">
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                        <div className="p-8 border transition-all cursor-pointer"
-                            style={{ borderColor: "#362222", backgroundColor: "#2B2B2B" }}
-                            onMouseEnter={(e) => {
-                                e.currentTarget.style.backgroundColor = "#362222";
-                                e.currentTarget.style.transform = "translateY(-4px)";
-                            }}
-                            onMouseLeave={(e) => {
-                                e.currentTarget.style.backgroundColor = "#2B2B2B";
-                                e.currentTarget.style.transform = "translateY(0)";
-                            }}>
-                            <h4 className="text-2xl font-bold text-white mb-3">BIKER</h4>
-                            <p className="text-gray-400 mb-4">Authentic leather jackets, vests, and accessories built to last</p>
-                            <span className="text-white text-sm font-medium">EXPLORE →</span>
-                        </div>
-                        <div className="p-8 border transition-all cursor-pointer"
-                            style={{ borderColor: "#362222", backgroundColor: "#2B2B2B" }}
-                            onMouseEnter={(e) => {
-                                e.currentTarget.style.backgroundColor = "#362222";
-                                e.currentTarget.style.transform = "translateY(-4px)";
-                            }}
-                            onMouseLeave={(e) => {
-                                e.currentTarget.style.backgroundColor = "#2B2B2B";
-                                e.currentTarget.style.transform = "translateY(0)";
-                            }}>
-                            <h4 className="text-2xl font-bold text-white mb-3">EMO</h4>
-                            <p className="text-gray-400 mb-4">Dark aesthetics, band merch, and statement pieces</p>
-                            <span className="text-white text-sm font-medium">EXPLORE →</span>
-                        </div>
-                        <div className="p-8 border transition-all cursor-pointer"
-                            style={{ borderColor: "#362222", backgroundColor: "#2B2B2B" }}
-                            onMouseEnter={(e) => {
-                                e.currentTarget.style.backgroundColor = "#362222";
-                                e.currentTarget.style.transform = "translateY(-4px)";
-                            }}
-                            onMouseLeave={(e) => {
-                                e.currentTarget.style.backgroundColor = "#2B2B2B";
-                                e.currentTarget.style.transform = "translateY(0)";
-                            }}>
-                            <h4 className="text-2xl font-bold text-white mb-3">ACCESSORIES</h4>
-                            <p className="text-gray-400 mb-4">Chains, studs, spikes, and everything metal</p>
-                            <span className="text-white text-sm font-medium">EXPLORE →</span>
-                        </div>
-                    </div>
-                </div>
-            </section>
+            <ScrollStackSection />
 
             {/* Newsletter */}
             <section className="px-6 py-20" style={{ backgroundColor: "#362222" }}>
@@ -165,7 +198,6 @@ export default function HomePage() {
                     </div>
                 </div>
             </section>
-
         </div>
     );
 }
