@@ -5,6 +5,7 @@ import React, { createContext, useContext, useState, useEffect, ReactNode, useCa
 import { useRouter } from 'next/navigation';
 import { authService } from '@/services/auth.service';
 import { UserFromToken } from '@/types/api.types';
+import { analytics } from '@/lib/analytics';
 
 interface AuthContextType {
     user: UserFromToken | null;
@@ -59,6 +60,10 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
             setUser(response.data as UserFromToken);
             setShowLoginPopup(false);
             router.push('/profile');
+
+            // After successful login:
+            analytics.login('email');
+
             return { success: true };
         } catch (error: any) {
             return { success: false, error: error.message || 'Login failed' };
@@ -76,6 +81,10 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
             setUser(response.data as UserFromToken);
             setShowLoginPopup(false);
             router.push('/profile');
+
+            // After successful registration:
+            analytics.signUp('email');
+
             return { success: true };
         } catch (error: any) {
             return { success: false, error: error.message || 'Registration failed' };
