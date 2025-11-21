@@ -16,6 +16,8 @@ export default function ShopLanding() {
   const [error, setError] = useState<string | null>(null);
   const itemsPerPage = 12;
 
+  console.log('API URL:', process.env.NEXT_PUBLIC_API_URL);
+
   const fetchAllItems = async (): Promise<Item[]> => {
     try {
       let pageNumber = 1;
