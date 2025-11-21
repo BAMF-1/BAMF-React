@@ -59,7 +59,7 @@ export default function RootLayout({
             />
           </CartProvider>
         </AuthProvider>
-        <GoogleAnalytics gaId={process.env.NEXT_PUBLIC_GA_ID || ""} />
+        <GoogleAnalytics gaId={process.env.GA_MEASUREMENT_ID || ""} />
       </body>
     </html>
   );
