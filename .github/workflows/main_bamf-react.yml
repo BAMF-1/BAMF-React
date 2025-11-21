@@ -34,7 +34,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: node-app
-          path: bamf-react/
+          path: bamf-react
 
   deploy:
     runs-on: ubuntu-latest
@@ -53,10 +53,9 @@ jobs:
           tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID }}
           subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID }}
 
-      - name: "Deploy to Azure Web App"
-        id: deploy-to-webapp
+      - name: Deploy to Azure Web App
         uses: azure/webapps-deploy@v3
         with:
-          app-name: "bamf-react"
-          slot-name: "Production"
-          package: .
+          app-name: bamf-react
+          slot-name: Production
+          package: bamf-react
