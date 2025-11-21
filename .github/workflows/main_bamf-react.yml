@@ -20,17 +20,15 @@ jobs:
       - name: Set up Node.js version
         uses: actions/setup-node@v4
         with:
-          node-version: '20.x'
-          cache: 'npm'
-          cache-dependency-path: './bamf-react/package-lock.json'
+          node-version: "20.x"
+          cache: "npm"
+          cache-dependency-path: "./bamf-react/package-lock.json"
 
       - name: npm install, build, and package
         working-directory: ./bamf-react
         run: |
           npm ci
           npm run build
-          tar -czf node_modules.tar.gz node_modules
-          ls -lh node_modules.tar.gz
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
@@ -55,10 +53,10 @@ jobs:
           tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID }}
           subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID }}
 
-      - name: 'Deploy to Azure Web App'
+      - name: "Deploy to Azure Web App"
         id: deploy-to-webapp
         uses: azure/webapps-deploy@v3
         with:
-          app-name: 'bamf-react'
-          slot-name: 'Production'
+          app-name: "bamf-react"
+          slot-name: "Production"
           package: .
