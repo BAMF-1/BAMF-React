@@ -55,7 +55,15 @@ export type GroupDetail = {
     size?: string | null;
     price: number;
     inStock: boolean;
-    primaryImageUrl?: string | null;
+    images?: Array<{
+      url: string;
+      altText?: string | null;
+      isPrimary: boolean;
+      sortOrder: number;
+    }>;
+    description?: string | null;
+    brand?: string | null;
+    material?: string | null;
   }>;
   facets: {
     colors: Array<{ value: string; count: number }>;

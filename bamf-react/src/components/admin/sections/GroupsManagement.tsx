@@ -5,7 +5,7 @@
 import { useEffect, useState } from 'react';
 import { BaseCRUDComponent, Column } from '../BaseCRUDComponent';
 import { FormWrapper, FormField } from '../FormWrapper';
-import { groupService, Group } from '@/lib/services/adminServices';
+import { groupService, Group, categoryService, Category } from '@/lib/services/adminServices';
 import { toast } from 'react-toastify';
 
 export default function GroupsManagement() {
@@ -14,6 +14,12 @@ export default function GroupsManagement() {
     const [isLoading, setIsLoading] = useState(true);
     const [isLoadingMore, setIsLoadingMore] = useState(false);
     const [page, setPage] = useState(1);
+
+    const [categoriesPage, setCategoriesPage] = useState(1);
+    const [categories, setCategories] = useState<Category[]>([]);
+    const [categoriesCount, setCategoriesCount] = useState(0);
+    const [isLoadingCategories, setIsLoadingCategories] = useState(true);
+
     const [formData, setFormData] = useState<Partial<Group> & { slug?: string }>({
         id: '',
         name: '',
@@ -24,7 +30,25 @@ export default function GroupsManagement() {
 
     useEffect(() => {
         loadGroups();
+        fetchCategories().then((cats) => {
+            setCategories(cats);
+            setIsLoadingCategories(false);
+        });
     }, []);
+
+    const fetchCategories = async () => {
+        try {
+            const response = await categoryService.getAll();
+            if (response.error) {
+                console.error('Error fetching categories:', response.error);
+                return [];
+            }
+            return response.data || [];
+        } catch (error) {
+            console.error('Error fetching categories:', error);
+            return [];
+        }
+    };
 
     const loadGroups = async (reset = true, pageNum = 1) => {
         if (reset) {
@@ -67,6 +91,11 @@ export default function GroupsManagement() {
         await loadGroups(false, nextPage);
     };
 
+    const handleLoadMoreCategories = async () => {
+        alert('Loading more categories is experimental.');
+        await fetchCategories();
+    };
+
     const handleDelete = async (id: number | string) => {
         try {
             const response = await groupService.delete(id);
@@ -105,6 +134,10 @@ export default function GroupsManagement() {
             const name = (formData.name || '').trim();
             if (!name) {
                 toast.error('Name is required.');
+                return;
+            }
+            if (!formData.objectId && !item) {
+                toast.error('Object ID is required for new groups.');
                 return;
             }
             // Use provided slug or auto-generate from name
@@ -194,9 +227,21 @@ export default function GroupsManagement() {
                         onChange={(val) => setFormData(prev => ({ ...prev, objectId: val }))}
                         placeholder="Optional identifier"
                         disabled={!!item}
+                        required
                     />
+                    {
+                        categoriesCount > 20 && (
+                            <button
+                                onClick={handleLoadMoreCategories}
+                            >
+                                Load More Categories
+                            </button>
+                        )
+                    }
                     <FormField
                         label="Category ID"
+                        type='select'
+                        options={categories.map(cat => ({ value: cat.id || '', label: cat.name || '' }))}
                         name="categoryId"
                         value={formData.categoryId}
                         onChange={(val) => setFormData(prev => ({ ...prev, categoryId: val }))}

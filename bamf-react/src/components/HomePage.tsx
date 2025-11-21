@@ -33,20 +33,20 @@ export default function HomePage() {
                         </p>
 
                         <div className="flex flex-col sm:flex-row gap-4">
-                            <button
-                                className="px-8 py-4 text-white font-bold text-sm tracking-wider transition-all transform hover:scale-105 cursor-pointer"
+                            <Link
+                                href="/shop"
+                                className="px-8 py-4 text-white font-bold text-sm tracking-wider transition-all transform hover:scale-105 cursor-pointer text-center"
                                 style={{ backgroundColor: "#362222" }}
                             >
                                 SHOP NOW
-                            </button>
-                            <button
-                                className="px-8 py-4 text-white font-medium text-sm tracking-wider border transition-colors cursor-pointer"
+                            </Link>
+                            <Link
+                                href="/about"
+                                className="px-8 py-4 text-white font-medium text-sm tracking-wider border transition-colors cursor-pointer text-center hover:bg-[#2B2B2B]"
                                 style={{ borderColor: "#423F3E", backgroundColor: "transparent" }}
-                                onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "#2B2B2B")}
-                                onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "transparent")}
                             >
-                                VIEW COLLECTIONS
-                            </button>
+                                ABOUT BAMF
+                            </Link>
                         </div>
                     </div>
                 </div>

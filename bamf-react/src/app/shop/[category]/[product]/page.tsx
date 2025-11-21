@@ -34,35 +34,37 @@ export default async function ProductPage({ params, searchParams }: Props) {
   let group;
   try {
     group = await fetchGroupDetail(productSlug, sku);
+    console.log("Fetched group detail:", group);
   } catch (err) {
     notFound();
   }
 
   // Mapping function
-  function mapGroupDetailToVariantSelector(groupDetail: GroupDetail) {
-    return {
-      name: groupDetail.name,
-      groupSlug: groupDetail.groupSlug || "",
-      variants: groupDetail.variants.map((v) => ({
-        sku: v.sku,
-        color: v.color,
-        size: v.size,
-        price: v.price,
-        inStock: v.inStock,
-        images: v.primaryImageUrl
-          ? [{ url: v.primaryImageUrl, isPrimary: true, sortOrder: 0 }]
-          : [],
-        description: null,
-        brand: null,
-        material: null,
-      })),
-      facets: {
-        colors: groupDetail.facets.colors,
-        sizes: groupDetail.facets.sizes,
-      },
-    };
-  }
+// Fixed mapping function - add this to your ProductPage component
 
+function mapGroupDetailToVariantSelector(groupDetail: GroupDetail) {
+  console.log("Mapping group detail:", groupDetail);
+  return {
+    name: groupDetail.name,
+    groupSlug: groupDetail.groupSlug || "",
+    variants: groupDetail.variants.map((v) => ({
+      sku: v.sku,
+      color: v.color,
+      size: v.size,
+      price: v.price,
+      inStock: v.inStock,
+      images: v.images,
+      // FIX: Map the actual values instead of setting to null
+      description: v.description || null,
+      brand: v.brand || null,
+      material: v.material || null,
+    })),
+    facets: {
+      colors: groupDetail.facets.colors,
+      sizes: groupDetail.facets.sizes,
+    },
+  };
+}
   const categories = await fetchCategories();
   const cat = categories.find((c) => c.slug === categorySlug);
 

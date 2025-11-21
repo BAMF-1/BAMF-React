@@ -553,21 +553,21 @@ export default function VariantsManagement() {
                                                         <img
                                                             src={img.url}
                                                             alt={img.altText || 'Product'}
-                                                            className="w-20 h-20 object-cover rounded"
+                                                            className="w-20 h-20 object-cover rounded flex-shrink-0"
                                                             onError={(e) => {
                                                                 e.currentTarget.src = '/placeholder.png';
                                                             }}
                                                         />
-                                                        <div className="flex-1">
+                                                        <div className="flex-1 min-w-0">
                                                             <p className="text-sm text-white truncate">{img.url}</p>
-                                                            <p className="text-xs text-gray-400 mt-1">{img.altText || 'No alt text'}</p>
-                                                            <div className="flex gap-2 mt-2">
+                                                            <p className="text-xs text-gray-400 mt-1 truncate">{img.altText || 'No alt text'}</p>
+                                                            <div className="flex gap-2 mt-2 flex-wrap">
                                                                 {img.isPrimary && (
-                                                                    <span className="px-2 py-1 bg-blue-500/20 text-blue-400 text-xs rounded">
+                                                                    <span className="px-2 py-1 bg-blue-500/20 text-blue-400 text-xs rounded whitespace-nowrap">
                                                                         Primary
                                                                     </span>
                                                                 )}
-                                                                <span className="px-2 py-1 bg-[#2a2a2a] text-gray-400 text-xs rounded">
+                                                                <span className="px-2 py-1 bg-[#2a2a2a] text-gray-400 text-xs rounded whitespace-nowrap">
                                                                     Order: {img.sortOrder}
                                                                 </span>
                                                             </div>
@@ -575,7 +575,7 @@ export default function VariantsManagement() {
                                                         <button
                                                             type="button"
                                                             onClick={() => deleteExistingImage(img.id, item.id)}
-                                                            className="p-2 text-red-400 hover:bg-red-400/10 rounded-lg transition self-start"
+                                                            className="p-2 text-red-400 hover:bg-red-400/10 rounded-lg transition self-start flex-shrink-0"
                                                         >
                                                             <X className="w-4 h-4" />
                                                         </button>

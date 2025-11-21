@@ -3,6 +3,7 @@
 import { useMemo, useState } from 'react';
 import ImageGallery from './ImageGallery';
 import { useCart } from '@/contexts/CartContext';
+import { toast } from 'react-toastify';
 
 interface VariantSelectorProps {
   group: {
@@ -48,28 +49,6 @@ export default function VariantSelector({ group, initialSku }: VariantSelectorPr
   const colorsAvailable = group.facets?.colors?.map(c => c.value) || [];
   const sizesAvailable = group.facets?.sizes?.map(s => s.value) || [];
 
-  // Determine enabled colors based on selected size
-  const colorsEnabled = useMemo(() => {
-    if (!size) return new Set(colorsAvailable);
-    return new Set(
-      group.variants
-        .filter(v => v.size === size)
-        .map(v => v.color)
-        .filter((c): c is string => c != null)
-    );
-  }, [size, group.variants, colorsAvailable]);
-
-  // Determine enabled sizes based on selected color
-  const sizesEnabled = useMemo(() => {
-    if (!color) return new Set(sizesAvailable);
-    return new Set(
-      group.variants
-        .filter(v => v.color === color)
-        .map(v => v.size)
-        .filter((s): s is string => s != null)
-    );
-  }, [color, group.variants, sizesAvailable]);
-
   // Get the resolved variant
   const resolved = useMemo(() => {
     return group.variants.find(v => v.color === color && v.size === size);
@@ -87,6 +66,40 @@ export default function VariantSelector({ group, initialSku }: VariantSelectorPr
     : group.variants.length > 0
       ? `From $${Math.min(...group.variants.map(v => v.price)).toFixed(2)}`
       : 'N/A';
+
+  // Handle color change - find a valid size for the new color
+  const handleColorChange = (newColor: string) => {
+    setColor(newColor);
+    
+    // Check if current size is available for new color
+    const variantExists = group.variants.some(v => v.color === newColor && v.size === size);
+    
+    // If not, find the first available size for this color
+    if (!variantExists) {
+      const firstAvailableSize = group.variants.find(v => v.color === newColor)?.size;
+      if (firstAvailableSize) {
+        toast.info(`The selected size is not available in color ${newColor}. Switched to size: ${firstAvailableSize}.`);
+        setSize(firstAvailableSize);
+      }
+    }
+  };
+
+  // Handle size change - find a valid color for the new size
+  const handleSizeChange = (newSize: string) => {
+    setSize(newSize);
+    
+    // Check if current color is available for new size
+    const variantExists = group.variants.some(v => v.size === newSize && v.color === color);
+    
+    // If not, find the first available color for this size
+    if (!variantExists) {
+      const firstAvailableColor = group.variants.find(v => v.size === newSize)?.color;
+      if (firstAvailableColor) {
+        toast.info(`The selected color is not available in size ${newSize}. Switched to color: ${firstAvailableColor}.`);
+        setColor(firstAvailableColor);
+      }
+    }
+  };
 
   const handleAddToCart = () => {
     if (!resolved || !resolved.inStock) return;
@@ -153,22 +166,20 @@ export default function VariantSelector({ group, initialSku }: VariantSelectorPr
             </div>
             <div className="flex flex-wrap gap-3">
               {colorsAvailable.map((c) => {
-                const isEnabled = colorsEnabled.has(c);
                 const isSelected = color === c;
                 return (
                   <button
                     key={c}
-                    disabled={!isEnabled}
-                    onClick={() => setColor(c)}
+                    onClick={() => handleColorChange(c)}
                     className="px-5 py-3 border font-medium text-sm tracking-wide transition-all"
                     style={{
-                      backgroundColor: isSelected ? '#362222' : (isEnabled ? '#2B2B2B' : '#1a1a1a'),
-                      borderColor: isSelected ? '#423F3E' : (isEnabled ? '#362222' : '#2B2B2B'),
-                      color: isEnabled ? 'white' : '#4a4a4a',
-                      cursor: isEnabled ? 'pointer' : 'not-allowed'
+                      backgroundColor: isSelected ? '#362222' : '#2B2B2B',
+                      borderColor: isSelected ? '#423F3E' : '#362222',
+                      color: 'white',
+                      cursor: 'pointer'
                     }}
-                    onMouseEnter={(e) => isEnabled && !isSelected && (e.currentTarget.style.backgroundColor = '#362222')}
-                    onMouseLeave={(e) => isEnabled && !isSelected && (e.currentTarget.style.backgroundColor = '#2B2B2B')}
+                    onMouseEnter={(e) => !isSelected && (e.currentTarget.style.backgroundColor = '#362222')}
+                    onMouseLeave={(e) => !isSelected && (e.currentTarget.style.backgroundColor = '#2B2B2B')}
                   >
                     {c}
                   </button>
@@ -186,22 +197,20 @@ export default function VariantSelector({ group, initialSku }: VariantSelectorPr
             </div>
             <div className="flex flex-wrap gap-3">
               {sizesAvailable.map((s) => {
-                const isEnabled = sizesEnabled.has(s);
                 const isSelected = size === s;
                 return (
                   <button
                     key={s}
-                    disabled={!isEnabled}
-                    onClick={() => setSize(s)}
+                    onClick={() => handleSizeChange(s)}
                     className="px-5 py-3 border font-medium text-sm tracking-wide transition-all"
                     style={{
-                      backgroundColor: isSelected ? '#362222' : (isEnabled ? '#2B2B2B' : '#1a1a1a'),
-                      borderColor: isSelected ? '#423F3E' : (isEnabled ? '#362222' : '#2B2B2B'),
-                      color: isEnabled ? 'white' : '#4a4a4a',
-                      cursor: isEnabled ? 'pointer' : 'not-allowed'
+                      backgroundColor: isSelected ? '#362222' : '#2B2B2B',
+                      borderColor: isSelected ? '#423F3E' : '#362222',
+                      color: 'white',
+                      cursor: 'pointer'
                     }}
-                    onMouseEnter={(e) => isEnabled && !isSelected && (e.currentTarget.style.backgroundColor = '#362222')}
-                    onMouseLeave={(e) => isEnabled && !isSelected && (e.currentTarget.style.backgroundColor = '#2B2B2B')}
+                    onMouseEnter={(e) => !isSelected && (e.currentTarget.style.backgroundColor = '#362222')}
+                    onMouseLeave={(e) => !isSelected && (e.currentTarget.style.backgroundColor = '#2B2B2B')}
                   >
                     {s}
                   </button>
