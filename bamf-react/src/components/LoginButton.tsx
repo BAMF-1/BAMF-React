@@ -12,7 +12,13 @@ export default function LoginButton() {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
+  // 1. Add a mounted state to track when hydration is complete
+  const [isMounted, setIsMounted] = useState(false);
+
   useEffect(() => {
+    // 2. Set mounted to true only after the component runs on the client
+    setIsMounted(true);
+
     console.log('🔐 Auth State:', {
       isAuthenticated,
       isAdmin: user?.role?.toLocaleLowerCase() === 'admin',
@@ -31,7 +37,6 @@ export default function LoginButton() {
     }
   }, [showLoginPopup]);
 
-  // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
@@ -52,8 +57,10 @@ export default function LoginButton() {
     await logout();
   };
 
-  // Wait for auth to load before rendering
-  if (isLoading) {
+  // 3. Check !isMounted OR isLoading. 
+  // This forces the client to render the "LOADING" state on the very first pass,
+  // matching what the server rendered.
+  if (!isMounted || isLoading) {
     return (
       <div className="w-full">
         <div
@@ -69,6 +76,7 @@ export default function LoginButton() {
     );
   }
 
+  // Everything below remains exactly the same
   return (
     <div className="w-full">
       {isAuthenticated ? (
@@ -101,7 +109,7 @@ export default function LoginButton() {
 
           {/* Dropdown Menu */}
           {dropdownOpen && (
-            <div className="absolute right-0 mt-2 w-48 md:w-56 bg-[#2B2B2B] border-2 border-[#362222] rounded shadow-lg z-50 animate-in fade-in slide-in-from-top-2 duration-200">
+            <div className="w-full absolute right-0 mt-2 bg-[#2B2B2B] border-2 border-[#362222] rounded shadow-lg z-50 animate-in fade-in slide-in-from-top-2 duration-200">
               {/* User Info Section */}
               <div className="px-4 py-3 border-b border-[#362222]">
                 <p className="text-white text-sm font-semibold truncate">

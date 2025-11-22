@@ -40,37 +40,36 @@ export default async function ProductPage({ params, searchParams }: Props) {
   }
 
   // Mapping function
-// Fixed mapping function - add this to your ProductPage component
+  // Fixed mapping function - add this to your ProductPage component
 
-function mapGroupDetailToVariantSelector(groupDetail: GroupDetail) {
-  console.log("Mapping group detail:", groupDetail);
-  return {
-    name: groupDetail.name,
-    groupSlug: groupDetail.groupSlug || "",
-    variants: groupDetail.variants.map((v) => ({
-      sku: v.sku,
-      color: v.color,
-      size: v.size,
-      price: v.price,
-      inStock: v.inStock,
-      images: v.images,
-      // FIX: Map the actual values instead of setting to null
-      description: v.description || null,
-      brand: v.brand || null,
-      material: v.material || null,
-    })),
-    facets: {
-      colors: groupDetail.facets.colors,
-      sizes: groupDetail.facets.sizes,
-    },
-  };
-}
+  function mapGroupDetailToVariantSelector(groupDetail: GroupDetail) {
+    return {
+      name: groupDetail.name,
+      groupSlug: groupDetail.groupSlug || "",
+      variants: groupDetail.variants.map((v) => ({
+        sku: v.sku,
+        color: v.color ?? "",
+        size: v.size ?? "",
+        price: v.price,
+        inStock: v.inStock,
+        images: v.images, // Already strings from api-client
+        description: v.description,
+        brand: v.brand,
+        material: v.material,
+      })),
+      facets: {
+        colors: groupDetail.facets.colors.map((c) => c.value),
+        sizes: groupDetail.facets.sizes.map((s) => s.value),
+      },
+    };
+  }
+
   const categories = await fetchCategories();
   const cat = categories.find((c) => c.slug === categorySlug);
 
   return (
     <div
-      className="min-h-screen text-white"
+      className="min-h-screen text-white pb-24" // Added pb-24
       style={{ backgroundColor: "#171010" }}
     >
       <ProductAnalytics
@@ -81,15 +80,22 @@ function mapGroupDetailToVariantSelector(groupDetail: GroupDetail) {
           category: cat?.name || undefined,
         }}
       />
-      <div className="container mx-auto px-4 py-8">
-        <Breadcrumbs
-          items={[
-            { label: "Home", href: "/" },
-            { label: "Shop", href: "/shop" },
-            { label: cat?.name || categorySlug, href: `/shop/${categorySlug}` },
-            { label: group.name },
-          ]}
-        />
+
+      {/* Matches Landing Page Header Spacing */}
+      <div className="pt-32 pb-8 px-6 md:px-12 border-b border-[#362222]">
+        <div className="container mx-auto">
+          <Breadcrumbs
+            items={[
+              { label: "Home", href: "/" },
+              { label: "Shop", href: "/shop" },
+              { label: cat?.name || categorySlug, href: `/shop/${categorySlug}` },
+              { label: group.name },
+            ]}
+          />
+        </div>
+      </div>
+
+      <div className="container mx-auto px-6 md:px-12 py-12">
         <div className="mt-8">
           <VariantSelector
             group={mapGroupDetailToVariantSelector(group)}
@@ -97,7 +103,9 @@ function mapGroupDetailToVariantSelector(groupDetail: GroupDetail) {
           />
         </div>
 
-        <ProductReviews groupSlug={group.groupSlug} />
+        <div className="mt-24 pt-12 border-t border-[#362222]">
+          <ProductReviews groupSlug={group.groupSlug} />
+        </div>
 
         <div className="ai-popup ">
           <OpenAiPopup groupSlug={group.groupSlug} />
@@ -106,3 +114,7 @@ function mapGroupDetailToVariantSelector(groupDetail: GroupDetail) {
     </div>
   );
 }
+
+
+// Inside ProductPage.tsx ...
+

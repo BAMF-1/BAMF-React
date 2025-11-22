@@ -108,7 +108,7 @@ export default function AdminPanel() {
     };
 
     return (
-        <div className="min-h-screen bg-[#1a1a1a] flex">
+        <div className="min-h-screen bg-[#1a1a1a] flex marginTopNav">
             {/* Sidebar */}
             <aside
                 className={`${isSidebarOpen ? 'w-72' : 'w-20'
@@ -143,8 +143,8 @@ export default function AdminPanel() {
                                 key={item.id}
                                 onClick={() => setActiveSection(item.id)}
                                 className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition ${isActive
-                                        ? 'bg-[#4a3a3a] text-white'
-                                        : 'text-gray-400 hover:bg-[#3a3a3a] hover:text-white'
+                                    ? 'bg-[#4a3a3a] text-white'
+                                    : 'text-gray-400 hover:bg-[#3a3a3a] hover:text-white'
                                     }`}
                                 title={!isSidebarOpen ? item.label : undefined}
                             >

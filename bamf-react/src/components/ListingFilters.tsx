@@ -1,4 +1,3 @@
-// components/ListingFilters.tsx
 "use client";
 
 import { analytics } from "@/lib/analytics";
@@ -41,26 +40,23 @@ export default function ListingFilters({
     [sp]
   );
 
+  // Custom button style for active/inactive filters
+  const getButtonClasses = (isActive: boolean) => {
+    const base = "px-4 py-2 border font-medium text-sm tracking-wide transition-all duration-300";
+    const activeStyle = "bg-[#423F3E] border-[#8B4513] text-white"; // Active/Selected
+    const inactiveStyle = "bg-[#2B2B2B] border-[#362222] text-gray-300 hover:bg-[#362222] hover:border-[#423F3E]"; // Inactive
+    return `${base} ${isActive ? activeStyle : inactiveStyle}`;
+  }
+
   return (
-    <aside className="space-y-6">
+    <aside className="space-y-8">
       <div>
         <label className="block text-sm font-bold mb-3 text-white uppercase tracking-wider">
           Color
         </label>
         <div className="flex flex-wrap gap-2">
           <button
-            className="px-4 py-2 border font-medium text-sm tracking-wide transition-all"
-            style={{
-              backgroundColor: !current.color ? "#362222" : "#2B2B2B",
-              borderColor: !current.color ? "#423F3E" : "#362222",
-              color: "white",
-            }}
-            onMouseEnter={(e) =>
-              !current.color && (e.currentTarget.style.borderColor = "#423F3E")
-            }
-            onMouseLeave={(e) =>
-              !current.color || (e.currentTarget.style.borderColor = "#362222")
-            }
+            className={getButtonClasses(!current.color)}
             onClick={() => updateParam("color", null)}
           >
             All
@@ -68,20 +64,7 @@ export default function ListingFilters({
           {availableColors.map((c) => (
             <button
               key={c}
-              className="px-4 py-2 border font-medium text-sm tracking-wide transition-all"
-              style={{
-                backgroundColor: current.color === c ? "#362222" : "#2B2B2B",
-                borderColor: current.color === c ? "#423F3E" : "#362222",
-                color: "white",
-              }}
-              onMouseEnter={(e) =>
-                current.color !== c &&
-                (e.currentTarget.style.backgroundColor = "#362222")
-              }
-              onMouseLeave={(e) =>
-                current.color !== c &&
-                (e.currentTarget.style.backgroundColor = "#2B2B2B")
-              }
+              className={getButtonClasses(current.color === c)}
               onClick={() => {
                 updateParam("color", c);
                 analytics.applyFilter("color", c);
@@ -99,18 +82,7 @@ export default function ListingFilters({
         </label>
         <div className="flex flex-wrap gap-2">
           <button
-            className="px-4 py-2 border font-medium text-sm tracking-wide transition-all"
-            style={{
-              backgroundColor: !current.size ? "#362222" : "#2B2B2B",
-              borderColor: !current.size ? "#423F3E" : "#362222",
-              color: "white",
-            }}
-            onMouseEnter={(e) =>
-              !current.size && (e.currentTarget.style.borderColor = "#423F3E")
-            }
-            onMouseLeave={(e) =>
-              !current.size || (e.currentTarget.style.borderColor = "#362222")
-            }
+            className={getButtonClasses(!current.size)}
             onClick={() => updateParam("size", null)}
           >
             All
@@ -118,20 +90,7 @@ export default function ListingFilters({
           {availableSizes.map((s) => (
             <button
               key={s}
-              className="px-4 py-2 border font-medium text-sm tracking-wide transition-all"
-              style={{
-                backgroundColor: current.size === s ? "#362222" : "#2B2B2B",
-                borderColor: current.size === s ? "#423F3E" : "#362222",
-                color: "white",
-              }}
-              onMouseEnter={(e) =>
-                current.size !== s &&
-                (e.currentTarget.style.backgroundColor = "#362222")
-              }
-              onMouseLeave={(e) =>
-                current.size !== s &&
-                (e.currentTarget.style.backgroundColor = "#2B2B2B")
-              }
+              className={getButtonClasses(current.size === s)}
               onClick={() => {
                 updateParam("size", s);
                 analytics.applyFilter("size", s);
@@ -150,8 +109,8 @@ export default function ListingFilters({
           </label>
           <input
             type="number"
-            className="w-full border px-3 py-2 text-white font-medium outline-none focus:border-[#423F3E] transition-colors"
-            style={{ backgroundColor: "#2B2B2B", borderColor: "#362222" }}
+            className="w-full border px-3 py-2 text-white font-medium outline-none transition-all duration-300
+                       bg-[#2B2B2B] border-[#362222] focus:border-white focus:ring-1 focus:ring-white focus:shadow-lg focus:shadow-black/50"
             value={localMin}
             onChange={(e) => setLocalMin(e.target.value)}
             onBlur={() => {
@@ -167,8 +126,8 @@ export default function ListingFilters({
           </label>
           <input
             type="number"
-            className="w-full border px-3 py-2 text-white font-medium outline-none focus:border-[#423F3E] transition-colors"
-            style={{ backgroundColor: "#2B2B2B", borderColor: "#362222" }}
+            className="w-full border px-3 py-2 text-white font-medium outline-none transition-all duration-300
+                       bg-[#2B2B2B] border-[#362222] focus:border-white focus:ring-1 focus:ring-white focus:shadow-lg focus:shadow-black/50"
             value={localMax}
             onChange={(e) => setLocalMax(e.target.value)}
             onBlur={() => {
@@ -185,8 +144,8 @@ export default function ListingFilters({
           Sort By
         </label>
         <select
-          className="w-full border px-3 py-2 text-white font-medium outline-none focus:border-[#423F3E] transition-colors cursor-pointer"
-          style={{ backgroundColor: "#2B2B2B", borderColor: "#362222" }}
+          className="w-full border px-3 py-2 text-white font-medium outline-none transition-all duration-300 cursor-pointer
+                     bg-[#2B2B2B] border-[#362222] focus:border-white focus:ring-1 focus:ring-white focus:shadow-lg focus:shadow-black/50"
           value={current.sort}
           onChange={(e) => {
             updateParam("sort", e.target.value);

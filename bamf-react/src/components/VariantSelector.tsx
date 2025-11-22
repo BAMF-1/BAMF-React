@@ -1,270 +1,309 @@
-'use client';
+"use client";
 
-import { useMemo, useState } from 'react';
-import ImageGallery from './ImageGallery';
-import { useCart } from '@/contexts/CartContext';
-import { toast } from 'react-toastify';
+import { useState, useEffect } from "react";
+import Image from "next/image";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useCart } from "@/contexts/CartContext";
+import { toast } from "react-toastify"; // Ensure you have this installed
 
-interface VariantSelectorProps {
-  group: {
-    name: string;
-    groupSlug: string;
-    variants: Array<{
-      sku: string;
-      color?: string | null;
-      size?: string | null;
-      price: number;
-      inStock: boolean;
-      description?: string | null;
-      brand?: string | null;
-      material?: string | null;
-      images?: Array<{
-        url: string;
-        altText?: string | null;
-        isPrimary: boolean;
-        sortOrder: number;
-      }>;
-    }>;
-    facets: {
-      colors?: Array<{ value: string; count: number }>;
-      sizes?: Array<{ value: string; count: number }>;
-    };
+type Variant = {
+  sku: string;
+  color: string;
+  size: string;
+  price: number;
+  inStock: boolean;
+  images: string[];
+  description: string | null;
+  brand: string | null;
+  material: string | null;
+};
+
+type GroupProps = {
+  name: string;
+  groupSlug: string;
+  variants: Variant[];
+  facets: {
+    colors: string[];
+    sizes: string[];
   };
+};
+
+export default function VariantSelector({
+  group,
+  initialSku,
+}: {
+  group: GroupProps;
   initialSku?: string;
-}
+}) {
+  const { addItem } = useCart(); // Fixed typo: additem -> addItem
+  const router = useRouter();
+  const searchParams = useSearchParams();
 
-export default function VariantSelector({ group, initialSku }: VariantSelectorProps) {
-  const { addItem } = useCart();
-  const [showAddedMessage, setShowAddedMessage] = useState(false);
+  // State
+  const [isSuccess, setIsSuccess] = useState(false);
+  const [selectedVariant, setSelectedVariant] = useState<Variant>(() => {
+    return (
+      group.variants.find((v) => v.sku === initialSku) || group.variants[0]
+    );
+  });
 
-  // Find initial variant
-  const initialVariant = initialSku
-    ? group.variants.find(v => v.sku === initialSku)
-    : group.variants[0];
+  const [activeImage, setActiveImage] = useState<string>(
+    selectedVariant.images[0] || ""
+  );
 
-  const [color, setColor] = useState(initialVariant?.color || '');
-  const [size, setSize] = useState(initialVariant?.size || '');
-
-  // Get available colors and sizes
-  const colorsAvailable = group.facets?.colors?.map(c => c.value) || [];
-  const sizesAvailable = group.facets?.sizes?.map(s => s.value) || [];
-
-  // Get the resolved variant
-  const resolved = useMemo(() => {
-    return group.variants.find(v => v.color === color && v.size === size);
-  }, [color, size, group.variants]);
-
-  // Get images for current variant
-  const currentImages = useMemo(() => {
-    if (!resolved || !resolved.images) return [];
-    return resolved.images;
-  }, [resolved]);
-
-  // Display price
-  const displayPrice = resolved
-    ? `$${resolved.price.toFixed(2)}`
-    : group.variants.length > 0
-      ? `From $${Math.min(...group.variants.map(v => v.price)).toFixed(2)}`
-      : 'N/A';
-
-  // Handle color change - find a valid size for the new color
-  const handleColorChange = (newColor: string) => {
-    setColor(newColor);
-    
-    // Check if current size is available for new color
-    const variantExists = group.variants.some(v => v.color === newColor && v.size === size);
-    
-    // If not, find the first available size for this color
-    if (!variantExists) {
-      const firstAvailableSize = group.variants.find(v => v.color === newColor)?.size;
-      if (firstAvailableSize) {
-        toast.info(`The selected size is not available in color ${newColor}. Switched to size: ${firstAvailableSize}.`);
-        setSize(firstAvailableSize);
+  // 1. Sync Active Image with Variant
+  useEffect(() => {
+    if (selectedVariant.images && selectedVariant.images.length > 0) {
+      // Only switch image if current one isn't available in new variant
+      if (!selectedVariant.images.includes(activeImage)) {
+        setActiveImage(selectedVariant.images[0]);
+      } else if (activeImage === "") {
+        setActiveImage(selectedVariant.images[0]);
       }
+    } else {
+      setActiveImage("");
+    }
+  }, [selectedVariant, activeImage]);
+
+  // 2. Handle Selection Logic (With Smart Fallback & Toasts)
+  const handleVariantChange = (key: "color" | "size", value: string) => {
+    const targetColor = key === "color" ? value : selectedVariant.color;
+    const targetSize = key === "size" ? value : selectedVariant.size;
+
+    // A. Try to find exact match
+    const exactMatch = group.variants.find(
+      (v) => v.color === targetColor && v.size === targetSize
+    );
+
+    // B. If no exact match, find the best available variant
+    // (e.g., user switched color, but old size is OOS for new color)
+    const bestMatch =
+      exactMatch ||
+      group.variants.find((v) =>
+        key === "color" ? v.color === value : v.size === value
+      );
+
+    if (bestMatch) {
+      // Notify user if we had to switch a property they didn't explicitly click
+      if (!exactMatch) {
+        if (key === "color") {
+          toast.info(
+            `Size ${targetSize} not available in ${value}. Switched to ${bestMatch.size}.`
+          );
+        } else {
+          toast.info(
+            `Color ${targetColor} not available in ${value}. Switched to ${bestMatch.color}.`
+          );
+        }
+      }
+
+      setSelectedVariant(bestMatch);
+
+      // Update URL
+      const newParams = new URLSearchParams(searchParams.toString());
+      newParams.set("sku", bestMatch.sku);
+      router.replace(`?${newParams.toString()}`, { scroll: false });
     }
   };
 
-  // Handle size change - find a valid color for the new size
-  const handleSizeChange = (newSize: string) => {
-    setSize(newSize);
-    
-    // Check if current color is available for new size
-    const variantExists = group.variants.some(v => v.size === newSize && v.color === color);
-    
-    // If not, find the first available color for this size
-    if (!variantExists) {
-      const firstAvailableColor = group.variants.find(v => v.size === newSize)?.color;
-      if (firstAvailableColor) {
-        toast.info(`The selected color is not available in size ${newSize}. Switched to color: ${firstAvailableColor}.`);
-        setColor(firstAvailableColor);
-      }
-    }
-  };
-
+  // 3. Handle Add To Cart
   const handleAddToCart = () => {
-    if (!resolved || !resolved.inStock) return;
+    if (!selectedVariant || !selectedVariant.inStock) return;
 
     addItem({
-      sku: resolved.sku,
+      sku: selectedVariant.sku,
       name: group.name,
-      color: resolved.color || undefined,
-      size: resolved.size || undefined,
-      price: resolved.price,
-      image: resolved.images?.[0]?.url,
-      groupSlug: group.groupSlug
+      color: selectedVariant.color || undefined,
+      size: selectedVariant.size || undefined,
+      price: selectedVariant.price,
+      image: selectedVariant.images?.[0], // Fixed: Access flattened string array
+      groupSlug: group.groupSlug,
     });
 
-    // Show success message
-    setShowAddedMessage(true);
-    setTimeout(() => setShowAddedMessage(false), 2000);
+    // Show visual success feedback
+    setIsSuccess(true);
+    setTimeout(() => setIsSuccess(false), 2000);
   };
 
+  const availableColors = Array.from(new Set(group.variants.map((v) => v.color)));
+  const availableSizes = Array.from(new Set(group.variants.map((v) => v.size)));
+
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-      {/* Left Column - Image Gallery */}
-      <div>
-        <ImageGallery
-          images={currentImages}
-          productName={group.name}
-        />
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-24 animate-in fade-in duration-700">
+
+      {/* LEFT: Image Gallery */}
+      <div className="flex flex-col gap-4">
+        <div className="relative aspect-[4/5] w-full bg-[#201a1a] overflow-hidden border border-[#362222]">
+          {activeImage ? (
+            <Image
+              src={activeImage}
+              alt={group.name}
+              fill
+              className="object-cover"
+              priority
+              sizes="(max-width: 768px) 100vw, 50vw"
+            />
+          ) : (
+            <div className="flex items-center justify-center h-full text-[#362222] font-mono uppercase">
+              No Image
+            </div>
+          )}
+
+          {!selectedVariant.inStock && (
+            <div className="absolute top-4 left-4 bg-black/80 backdrop-blur border border-white px-4 py-2 z-10">
+              <span className="text-white text-xs font-bold tracking-widest uppercase">
+                Sold Out
+              </span>
+            </div>
+          )}
+        </div>
+
+        {/* Thumbnails */}
+        {selectedVariant.images.length > 1 && (
+          <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
+            {selectedVariant.images.map((img, idx) => (
+              <button
+                key={`${selectedVariant.sku}-${idx}`}
+                onClick={() => setActiveImage(img)}
+                className={`relative flex-shrink-0 w-20 aspect-[4/5] border transition-all duration-300 ${activeImage === img
+                    ? "border-[#8B4513] opacity-100 ring-1 ring-[#8B4513]"
+                    : "border-transparent opacity-60 hover:opacity-100 hover:border-gray-600"
+                  }`}
+              >
+                <Image
+                  src={img}
+                  alt={`View ${idx}`}
+                  fill
+                  className="object-cover"
+                />
+              </button>
+            ))}
+          </div>
+        )}
       </div>
 
-      {/* Right Column - Product Info */}
-      <div>
-        <h1 className="text-4xl md:text-5xl font-bold text-white mb-3 uppercase tracking-tight">{group.name}</h1>
-        <div className="text-3xl font-bold text-white mb-8">{displayPrice}</div>
+      {/* RIGHT: Details */}
+      <div className="flex flex-col justify-center">
 
-        {/* Variant Metadata Section */}
-        <div className="mb-8 space-y-4 border-t border-b py-6" style={{ borderColor: '#362222' }}>
-          <div className="flex items-baseline gap-3">
-            <span className="text-sm text-gray-400 font-bold uppercase tracking-wider">Brand:</span>
-            <span className="text-base text-white font-medium">
-              {resolved?.brand || 'N/A'}
+        {/* Header */}
+        <div className="mb-8 border-b border-[#362222] pb-8">
+          <h1 className="text-4xl md:text-6xl font-black text-white mb-4 tracking-tighter uppercase leading-none">
+            {group.name}
+          </h1>
+
+          <div className="flex items-center justify-between">
+            <span className="text-3xl font-mono text-[#8B4513]">
+              ${selectedVariant.price.toFixed(2)}
             </span>
-          </div>
-
-          <div className="flex items-baseline gap-3">
-            <span className="text-sm text-gray-400 font-bold uppercase tracking-wider">Material:</span>
-            <span className="text-base text-white font-medium">
-              {resolved?.material || 'N/A'}
+            <span className="text-xs font-mono text-gray-500 uppercase tracking-widest">
+              SKU: {selectedVariant.sku}
             </span>
-          </div>
-
-          <div>
-            <h3 className="text-sm font-bold text-gray-400 mb-2 uppercase tracking-wider">Description</h3>
-            <p className="text-base text-gray-300 leading-relaxed">
-              {resolved?.description || 'No description available.'}
-            </p>
           </div>
         </div>
 
-        {/* Color Selector */}
-        {colorsAvailable.length > 0 && (
-          <div className="mb-8">
-            <div className="text-sm font-bold text-white mb-3 uppercase tracking-wider">
-              Color {color && <span className="text-gray-300">: {color}</span>}
-            </div>
+        {/* Selectors */}
+        <div className="space-y-8 mb-12">
+          {/* Color */}
+          <div>
+            <label className="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-4">
+              Color <span className="text-white ml-2">{selectedVariant.color}</span>
+            </label>
             <div className="flex flex-wrap gap-3">
-              {colorsAvailable.map((c) => {
-                const isSelected = color === c;
+              {availableColors.map((color) => (
+                <button
+                  key={color}
+                  onClick={() => handleVariantChange("color", color)}
+                  className={`px-4 py-2 text-sm font-bold uppercase tracking-widest border transition-all duration-300 ${selectedVariant.color === color
+                      ? "bg-white text-black border-white"
+                      : "bg-transparent text-gray-400 border-[#362222] hover:border-gray-400"
+                    }`}
+                >
+                  {color}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Size */}
+          <div>
+            <label className="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-4">
+              Size <span className="text-white ml-2">{selectedVariant.size}</span>
+            </label>
+            <div className="grid grid-cols-4 sm:grid-cols-6 gap-2">
+              {availableSizes.map((size) => {
+                // Check availability relative to currently selected color
+                const isAvailable = group.variants.some(
+                  (v) =>
+                    v.size === size &&
+                    v.color === selectedVariant.color &&
+                    v.inStock
+                );
+
                 return (
                   <button
-                    key={c}
-                    onClick={() => handleColorChange(c)}
-                    className="px-5 py-3 border font-medium text-sm tracking-wide transition-all"
-                    style={{
-                      backgroundColor: isSelected ? '#362222' : '#2B2B2B',
-                      borderColor: isSelected ? '#423F3E' : '#362222',
-                      color: 'white',
-                      cursor: 'pointer'
-                    }}
-                    onMouseEnter={(e) => !isSelected && (e.currentTarget.style.backgroundColor = '#362222')}
-                    onMouseLeave={(e) => !isSelected && (e.currentTarget.style.backgroundColor = '#2B2B2B')}
+                    key={size}
+                    onClick={() => handleVariantChange("size", size)}
+                    className={`h-12 flex items-center justify-center text-sm font-mono border transition-all duration-300 ${selectedVariant.size === size
+                        ? "bg-[#8B4513] border-[#8B4513] text-white"
+                        : isAvailable
+                          ? "bg-transparent border-[#362222] text-gray-300 hover:border-white"
+                          : "bg-[#201a1a] border-transparent text-gray-600 cursor-not-allowed decoration-slice line-through"
+                      }`}
                   >
-                    {c}
+                    {size}
                   </button>
                 );
               })}
             </div>
           </div>
-        )}
+        </div>
 
-        {/* Size Selector */}
-        {sizesAvailable.length > 0 && (
-          <div className="mb-8">
-            <div className="text-sm font-bold text-white mb-3 uppercase tracking-wider">
-              Size {size && <span className="text-gray-300">: {size}</span>}
-            </div>
-            <div className="flex flex-wrap gap-3">
-              {sizesAvailable.map((s) => {
-                const isSelected = size === s;
-                return (
-                  <button
-                    key={s}
-                    onClick={() => handleSizeChange(s)}
-                    className="px-5 py-3 border font-medium text-sm tracking-wide transition-all"
-                    style={{
-                      backgroundColor: isSelected ? '#362222' : '#2B2B2B',
-                      borderColor: isSelected ? '#423F3E' : '#362222',
-                      color: 'white',
-                      cursor: 'pointer'
-                    }}
-                    onMouseEnter={(e) => !isSelected && (e.currentTarget.style.backgroundColor = '#362222')}
-                    onMouseLeave={(e) => !isSelected && (e.currentTarget.style.backgroundColor = '#2B2B2B')}
-                  >
-                    {s}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-        )}
-
-        {/* Stock Status */}
-        {resolved && (
-          <div className="mb-6">
-            {resolved.inStock ? (
-              <span className="text-green-400 text-sm font-bold tracking-wider uppercase">✓ In Stock</span>
-            ) : (
-              <span className="text-red-400 text-sm font-bold tracking-wider uppercase">✗ Out of Stock</span>
-            )}
-          </div>
-        )}
+        {/* Description */}
+        <div className="mb-12">
+          {selectedVariant.description ? (
+            <p className="text-gray-400 leading-relaxed text-sm">
+              {selectedVariant.description}
+            </p>
+          ) : (
+            <p className="text-gray-600 italic text-sm font-mono">
+              No description available.
+            </p>
+          )}
+        </div>
 
         {/* Add to Cart Button */}
-        {resolved && (
-          <div className="relative">
-            <button
-              disabled={!resolved.inStock}
-              onClick={handleAddToCart}
-              className="w-full py-4 font-bold text-base tracking-widest transition-all uppercase"
-              style={{
-                backgroundColor: resolved.inStock ? '#362222' : '#1a1a1a',
-                color: resolved.inStock ? 'white' : '#4a4a4a',
-                borderWidth: '2px',
-                borderColor: resolved.inStock ? '#423F3E' : '#2B2B2B',
-                cursor: resolved.inStock ? 'pointer' : 'not-allowed'
-              }}
-              onMouseEnter={(e) => resolved.inStock && (e.currentTarget.style.backgroundColor = '#423F3E')}
-              onMouseLeave={(e) => resolved.inStock && (e.currentTarget.style.backgroundColor = '#362222')}
-            >
-              {resolved.inStock ? 'Add to Cart' : 'Out of Stock'}
-            </button>
+        <button
+          disabled={!selectedVariant.inStock || isSuccess}
+          onClick={handleAddToCart}
+          className={`w-full py-5 font-black uppercase tracking-[0.2em] text-sm transition-all duration-300 ${isSuccess
+              ? "bg-green-700 text-white cursor-default"
+              : selectedVariant.inStock
+                ? "bg-white text-black hover:bg-[#8B4513] hover:text-white"
+                : "bg-[#362222] text-gray-500 cursor-not-allowed"
+            }`}
+        >
+          {isSuccess
+            ? "Added to Cart ✓"
+            : selectedVariant.inStock
+              ? "Add To Cart"
+              : "Out of Stock"}
+        </button>
 
-            {/* Success Message */}
-            {showAddedMessage && (
-              <div className="absolute top-full left-0 right-0 mt-2 py-2 px-4 text-center text-sm font-bold text-white rounded"
-                style={{ backgroundColor: '#8B4545' }}>
-                ✓ Added to cart!
+        {/* Tech Specs */}
+        {(selectedVariant.material || selectedVariant.brand) && (
+          <div className="mt-8 pt-6 border-t border-[#362222] grid grid-cols-2 gap-4 text-xs font-mono text-gray-500 uppercase">
+            {selectedVariant.material && (
+              <div>
+                <span className="block text-gray-700 mb-1">Material</span>
+                <span className="text-gray-300">{selectedVariant.material}</span>
               </div>
             )}
-          </div>
-        )}
-
-        {/* SKU Display */}
-        {resolved && (
-          <div className="mt-6 text-xs text-gray-500 font-medium tracking-wider">
-            SKU: {resolved.sku}
+            {selectedVariant.brand && (
+              <div>
+                <span className="block text-gray-700 mb-1">Brand</span>
+                <span className="text-gray-300">{selectedVariant.brand}</span>
+              </div>
+            )}
           </div>
         )}
       </div>

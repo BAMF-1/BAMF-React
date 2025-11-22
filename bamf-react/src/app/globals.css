@@ -57,6 +57,16 @@
   --foreground: #171717;
 }
 
+.marginTopNav {
+  margin-top: 5vh;
+}
+
+@media (min-width: 768px) {
+  .marginTopNav {
+    margin-top: 12vh;
+  }
+}
+
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);

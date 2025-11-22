@@ -13,10 +13,8 @@ export interface StaggeredMenuSocialItem {
   link: string;
 }
 export interface StaggeredMenuProps {
-  // New props for external control
   open: boolean;
   onToggle: () => void;
-
   position?: 'left' | 'right';
   colors?: string[];
   items?: StaggeredMenuItem[];
@@ -35,8 +33,8 @@ export interface StaggeredMenuProps {
 }
 
 export const StaggeredMenu: React.FC<StaggeredMenuProps> = ({
-  open, // <-- CONTROLLED PROP
-  onToggle, // <-- CONTROLLED HANDLER (not used internally for animations, but kept for context)
+  open,
+  onToggle,
   position = 'right',
   colors = ['#B19EEF', '#5227FF'],
   items = [],
@@ -53,7 +51,6 @@ export const StaggeredMenu: React.FC<StaggeredMenuProps> = ({
   onMenuOpen,
   onMenuClose
 }: StaggeredMenuProps) => {
-  // Removed internal 'open' state, now using prop
   const openRef = useRef(false);
 
   const panelRef = useRef<HTMLDivElement | null>(null);
@@ -79,20 +76,12 @@ export const StaggeredMenu: React.FC<StaggeredMenuProps> = ({
 
   const itemEntranceTweenRef = useRef<gsap.core.Tween | null>(null);
 
-  // --- Animation Logic (Kept mostly intact, but triggered by useEffect) ---
-
   useLayoutEffect(() => {
     const ctx = gsap.context(() => {
       const panel = panelRef.current;
       const preContainer = preLayersRef.current;
 
-      // Icon/Text refs are no longer needed here as the toggle button is external
-      // const plusH = plusHRef.current;
-      // const plusV = plusVRef.current;
-      // const icon = iconRef.current;
-      // const textInner = textInnerRef.current;
-
-      if (!panel) return; // Simplified check
+      if (!panel) return;
 
       let preLayers: HTMLElement[] = [];
       if (preContainer) {
@@ -269,6 +258,28 @@ export const StaggeredMenu: React.FC<StaggeredMenuProps> = ({
     }
   }, [open, playOpen, playClose, position]);
 
+  // --- Body Scroll Lock Hook ---
+  React.useEffect(() => {
+    const handleScrollLock = () => {
+      const isMobile = window.innerWidth <= 1024;
+
+      if (open && isMobile) {
+        document.body.style.overflow = 'hidden';
+      } else {
+        document.body.style.overflow = '';
+      }
+    };
+
+    handleScrollLock();
+
+    window.addEventListener('resize', handleScrollLock);
+
+    return () => {
+      window.removeEventListener('resize', handleScrollLock);
+      document.body.style.overflow = '';
+    };
+  }, [open]);
+
 
   return (
     <div
@@ -385,8 +396,7 @@ export const StaggeredMenu: React.FC<StaggeredMenuProps> = ({
 .sm-scope .staggered-menu-panel { position: absolute; top: 0; right: 0; width: clamp(260px, 38vw, 420px); height: 100%; background: white; backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); display: flex; flex-direction: column; padding: 6em 2em 2em 2em; overflow-y: auto; z-index: 10; }
 .sm-scope [data-position='left'] .staggered-menu-panel { right: auto; left: 0; }
 .sm-scope .sm-prelayers { position: absolute; top: 0; right: 0; bottom: 0; width: clamp(260px, 38vw, 420px); pointer-events: none; z-index: 5; }
-.sm-scope [data-position='left'] .sm-prelayers { right: auto; left: 0; }
-.sm-scope .sm-prelayer { position: absolute; top: 0; right: 0; height: 100%; width: 100%; transform: translateX(0); }
+@media (max-width: 1024px) { .sm-scope .sm-prelayers { width: 100%; } }
 .sm-scope .sm-panel-inner { flex: 1; display: flex; flex-direction: column; gap: 1.25rem; }
 .sm-scope .sm-socials { margin-top: auto; padding-top: 2rem; display: flex; flex-direction: column; gap: 0.75rem; }
 .sm-scope .sm-socials-title { margin: 0; font-size: 1rem; font-weight: 500; color: var(--sm-accent, #ff0000); }
@@ -406,8 +416,8 @@ export const StaggeredMenu: React.FC<StaggeredMenuProps> = ({
 .sm-scope .sm-panel-item:hover { color: var(--sm-accent, #ff0000); }
 .sm-scope .sm-panel-list[data-numbering] { counter-reset: smItem; }
 .sm-scope .sm-panel-list[data-numbering] .sm-panel-item::after { counter-increment: smItem; content: counter(smItem, decimal-leading-zero); position: absolute; top: 0.1em; right: 3.2em; font-size: 18px; font-weight: 400; color: var(--sm-accent, #ff0000); letter-spacing: 0; pointer-events: none; user-select: none; opacity: var(--sm-num-opacity, 0); }
-@media (max-width: 1024px) { .sm-scope .staggered-menu-panel { width: 100%; left: 0; right: 0; } }
-@media (max-width: 640px) { .sm-scope .staggered-menu-panel { width: 100%; left: 0; right: 0; } }
+@media (max-width: 1024px) { .sm-scope .staggered-menu-panel { width: 100% !important; left: 0; right: 0; } }
+@media (max-width: 640px) { .sm-scope .staggered-menu-panel { width: 100% !important; left: 0; right: 0; } }
 
 .sm-scope .staggered-menu-panel { 
   position: absolute; 

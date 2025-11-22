@@ -16,8 +16,6 @@ export default function ShopLanding() {
   const [error, setError] = useState<string | null>(null);
   const itemsPerPage = 12;
 
-  console.log('API URL:', process.env.NEXT_PUBLIC_API_URL);
-
   const fetchAllItems = async (): Promise<Item[]> => {
     try {
       let pageNumber = 1;
@@ -46,7 +44,6 @@ export default function ShopLanding() {
     const loadData = async () => {
       setIsLoading(true);
       try {
-        // Fetch categories and items in parallel
         const [categoriesData, itemsData] = await Promise.all([
           fetchCategories().catch(() => []),
           fetchAllItems()
@@ -81,258 +78,155 @@ export default function ShopLanding() {
 
   if (isLoading) {
     return (
-      <main className="container mx-auto px-4 py-8" style={{ backgroundColor: '#171010', minHeight: '100vh' }}>
-        <div className="text-center py-12">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto"></div>
-          <p className="mt-4 text-gray-300">Loading shop...</p>
-        </div>
+      <main className="container mx-auto px-4 py-8 min-h-screen flex items-center justify-center" style={{ backgroundColor: '#171010' }}>
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#8B4513]"></div>
       </main>
     );
   }
 
   if (categories.length === 0 && allItems.length === 0) {
     return (
-      <main className="container mx-auto px-4 py-8" style={{ backgroundColor: '#171010', minHeight: '100vh' }}>
-        <div className="text-center py-12">
-          <p className="text-gray-300 mb-4">Backend API is not available. Please start the backend server.</p>
-          <p className="text-sm text-gray-400">Expected API at: {process.env.NEXT_PUBLIC_API_URL || '"Backend URL"'}</p>
-        </div>
+      <main className="container mx-auto px-4 py-24 text-center min-h-screen" style={{ backgroundColor: '#171010' }}>
+        <p className="text-gray-400 mb-4 text-xl">Store is currently empty.</p>
+        <p className="text-sm text-gray-600 font-mono">API Connection: {process.env.NEXT_PUBLIC_API_URL || 'Not Set'}</p>
       </main>
     );
   }
 
   return (
-    <main className="container mx-auto px-4 py-8" style={{ backgroundColor: '#171010', minHeight: '100vh' }}>
-      <div className="mb-8">
-        <h1 className="text-5xl md:text-6xl font-bold mb-2 text-white tracking-tight">SHOP</h1>
-        <p className="text-gray-300 text-lg">Discover our collection of products</p>
+    <main className="min-h-screen pb-24" style={{ backgroundColor: '#171010' }}>
+      {/* Header Section */}
+      <div className="pt-32 pb-12 px-6 md:px-12 border-b border-[#362222]">
+        <div className="container mx-auto">
+          <h1 className="text-5xl md:text-7xl font-black text-white mb-4 tracking-tighter">THE SHOP</h1>
+          <p className="text-gray-400 text-lg max-w-xl">
+            Raw materials. Industrial construction. Essentials for the road ahead.
+          </p>
+        </div>
       </div>
 
-      {/* Categories Section */}
-      {categories.length > 0 && (
-        <section className="mb-12">
-          <h2 className="text-3xl font-bold text-white mb-6 tracking-wide">SHOP BY CATEGORY</h2>
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-            {categories.map((c) => (
-              <Link
-                key={c.id}
-                href={`/shop/${encodeURIComponent(c.slug)}`}
-                className="group block p-6 border transition-all duration-200 hover:transform hover:-translate-y-1"
-                style={{ backgroundColor: '#2B2B2B', borderColor: '#362222' }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.backgroundColor = '#362222';
-                  e.currentTarget.style.borderColor = '#423F3E';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.backgroundColor = '#2B2B2B';
-                  e.currentTarget.style.borderColor = '#362222';
-                }}
-              >
-                <div className="text-lg font-bold text-white transition-colors uppercase tracking-wide">
-                  {c.name}
-                </div>
-                <div className="text-sm text-gray-400 mt-1">
-                  Explore {c.name}
-                </div>
-              </Link>
-            ))}
-          </div>
-        </section>
-      )}
+      <div className="container mx-auto px-6 md:px-12 py-12">
 
-      {/* All Items Section */}
-      {allItems.length > 0 && (
-        <section>
-          <div className="flex justify-between items-center mb-6">
-            <h2 className="text-3xl font-bold text-white tracking-wide">ALL PRODUCTS</h2>
-            <p className="text-gray-400">
-              Showing {((currentPage - 1) * itemsPerPage) + 1}-{Math.min(currentPage * itemsPerPage, allItems.length)} of {allItems.length} products
-            </p>
-          </div>
-
-          {/* Products Grid */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 mb-8">
-            {displayedItems.map((item) => {
-              // Build URL in format: /shop/{category}/{product-slug}?sku={sku}
-              const categorySlug = item.mainCategory.toLowerCase().replace(/\s+/g, '-');
-              const productSlug = item.slug;
-              const href = `/shop/${encodeURIComponent(categorySlug)}/${encodeURIComponent(productSlug)}?sku=${encodeURIComponent(item.sku)}`;
-
-              return (
+        {/* Minimal Category Pills */}
+        {categories.length > 0 && (
+          <section className="mb-16">
+            <div className="flex flex-wrap gap-3">
+              {categories.map((c) => (
                 <Link
-                  key={item.id}
-                  href={href}
-                  className="group block border overflow-hidden hover:shadow-xl transition-all duration-300 hover:transform hover:-translate-y-1"
-                  style={{ backgroundColor: '#2B2B2B', borderColor: '#362222' }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.borderColor = '#423F3E';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.borderColor = '#362222';
-                  }}
+                  key={c.id}
+                  href={`/shop/${encodeURIComponent(c.slug)}`}
+                  className="px-6 py-2 rounded-full border border-[#362222] text-gray-400 text-sm font-bold tracking-widest uppercase hover:text-white hover:border-white hover:bg-[#201a1a] transition-all duration-300"
                 >
-                  {/* Product Image */}
-                  <div className="relative aspect-square overflow-hidden" style={{ backgroundColor: '#171010' }}>
-                    {item.primaryImageUrl ? (
-                      <Image
-                        src={item.primaryImageUrl}
-                        alt={item.groupName}
-                        fill
-                        className="object-cover group-hover:scale-105 transition-transform duration-300"
-                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
-                      />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center text-gray-500">
-                        <svg className="w-16 h-16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                        </svg>
-                      </div>
-                    )}
-                    {!item.inStock && (
-                      <div className="absolute inset-0 bg-black bg-opacity-70 flex items-center justify-center">
-                        <span className="px-4 py-2 text-white text-sm font-bold tracking-wider" style={{ backgroundColor: '#362222' }}>
-                          OUT OF STOCK
-                        </span>
-                      </div>
-                    )}
-                    {item.moreVariantsCount > 0 && (
-                      <div className="absolute top-2 right-2 px-2 py-1 text-white text-xs font-bold tracking-wider" style={{ backgroundColor: '#362222' }}>
-                        +{item.moreVariantsCount} VARIANTS
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Product Info */}
-                  <div className="p-4">
-                    <div className="text-xs text-gray-400 mb-1 uppercase tracking-wider font-medium">
-                      {item.mainCategory}
-                    </div>
-                    <h3 className="font-bold text-white mb-2 transition-colors line-clamp-2 uppercase tracking-wide">
-                      {item.groupName}
-                    </h3>
-                    <div className="flex items-center gap-2 text-sm text-gray-400 mb-3">
-                      <span>{item.color}</span>
-                      <span>•</span>
-                      <span>{item.size}</span>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-xl font-bold text-white">
-                        ${item.price.toFixed(2)}
-                      </span>
-                      {item.inStock && (
-                        <span className="text-xs text-green-400 font-bold tracking-wider">
-                          IN STOCK
-                        </span>
-                      )}
-                    </div>
-                  </div>
+                  {c.name}
                 </Link>
-              );
-            })}
-          </div>
-
-          {/* Pagination */}
-          {totalPages > 1 && (
-            <div className="flex justify-center items-center gap-2">
-              <button
-                onClick={() => handlePageChange(currentPage - 1)}
-                disabled={currentPage === 1}
-                className="px-4 py-2 rounded-lg border disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 text-white font-medium"
-                style={{
-                  backgroundColor: currentPage === 1 ? '#2B2B2B' : '#2B2B2B',
-                  borderColor: '#362222'
-                }}
-                onMouseEnter={(e) => {
-                  if (currentPage !== 1) {
-                    e.currentTarget.style.backgroundColor = '#362222';
-                    e.currentTarget.style.borderColor = '#423F3E';
-                  }
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.backgroundColor = '#2B2B2B';
-                  e.currentTarget.style.borderColor = '#362222';
-                }}
-              >
-                Previous
-              </button>
-
-              <div className="flex gap-2">
-                {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => {
-                  // Show first page, last page, current page, and pages around current page
-                  if (
-                    page === 1 ||
-                    page === totalPages ||
-                    (page >= currentPage - 1 && page <= currentPage + 1)
-                  ) {
-                    return (
-                      <button
-                        key={page}
-                        onClick={() => handlePageChange(page)}
-                        className={`px-4 py-2 rounded-lg border transition-all duration-200 font-medium ${currentPage === page
-                          ? 'text-white'
-                          : 'text-gray-300'
-                          }`}
-                        style={{
-                          backgroundColor: currentPage === page ? '#362222' : '#2B2B2B',
-                          borderColor: currentPage === page ? '#423F3E' : '#362222'
-                        }}
-                        onMouseEnter={(e) => {
-                          if (currentPage !== page) {
-                            e.currentTarget.style.backgroundColor = '#362222';
-                            e.currentTarget.style.borderColor = '#423F3E';
-                          }
-                        }}
-                        onMouseLeave={(e) => {
-                          if (currentPage !== page) {
-                            e.currentTarget.style.backgroundColor = '#2B2B2B';
-                            e.currentTarget.style.borderColor = '#362222';
-                          }
-                        }}
-                      >
-                        {page}
-                      </button>
-                    );
-                  } else if (
-                    page === currentPage - 2 ||
-                    page === currentPage + 2
-                  ) {
-                    return <span key={page} className="px-2 py-2 text-gray-400">...</span>;
-                  }
-                  return null;
-                })}
-              </div>
-
-              <button
-                onClick={() => handlePageChange(currentPage + 1)}
-                disabled={currentPage === totalPages}
-                className="px-4 py-2 rounded-lg border disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 text-white font-medium"
-                style={{
-                  backgroundColor: currentPage === totalPages ? '#2B2B2B' : '#2B2B2B',
-                  borderColor: '#362222'
-                }}
-                onMouseEnter={(e) => {
-                  if (currentPage !== totalPages) {
-                    e.currentTarget.style.backgroundColor = '#362222';
-                    e.currentTarget.style.borderColor = '#423F3E';
-                  }
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.backgroundColor = '#2B2B2B';
-                  e.currentTarget.style.borderColor = '#362222';
-                }}
-              >
-                Next
-              </button>
+              ))}
             </div>
-          )}
-        </section>
-      )}
+          </section>
+        )}
 
-      {allItems.length === 0 && !isLoading && (
-        <div className="text-center py-12">
-          <p className="text-gray-300 text-lg">No products available at the moment.</p>
-        </div>
-      )}
+        {/* Product Grid - Gallery Style */}
+        {allItems.length > 0 && (
+          <section>
+            <div className="flex justify-between items-end mb-8 border-b border-[#362222] pb-4">
+              <span className="text-gray-500 font-mono text-xs">
+                {((currentPage - 1) * itemsPerPage) + 1} — {Math.min(currentPage * itemsPerPage, allItems.length)} / {allItems.length}
+              </span>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-x-8 gap-y-16 mb-24">
+              {displayedItems.map((item) => {
+                const categorySlug = item.mainCategory.toLowerCase().replace(/\s+/g, '-');
+                const href = `/shop/${encodeURIComponent(categorySlug)}/${encodeURIComponent(item.slug)}?sku=${encodeURIComponent(item.sku)}`;
+
+                return (
+                  <Link
+                    key={item.id}
+                    href={href}
+                    className="group block"
+                  >
+                    {/* Image Container - Clean, no border */}
+                    <div className="relative aspect-[4/5] w-full overflow-hidden bg-[#201a1a] mb-6">
+                      {item.primaryImageUrl ? (
+                        <Image
+                          src={item.primaryImageUrl}
+                          alt={item.groupName}
+                          fill
+                          className="object-cover transition-transform duration-700 ease-out group-hover:scale-110"
+                          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center text-[#362222]">
+                          <span className="font-mono text-xs">NO IMAGE</span>
+                        </div>
+                      )}
+
+                      {/* Overlay Badges */}
+                      {!item.inStock && (
+                        <div className="absolute inset-0 bg-black/60 flex items-center justify-center backdrop-blur-sm">
+                          <span className="text-white font-bold tracking-widest border border-white px-4 py-2">SOLD OUT</span>
+                        </div>
+                      )}
+
+                      {/* Quick Add / Hover Action (Optional visual cue) */}
+                      <div className="absolute bottom-0 left-0 w-full p-4 opacity-0 translate-y-4 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-500">
+                        <div className="bg-white text-black text-center py-3 font-bold uppercase text-xs tracking-widest">
+                          View Details
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Minimal Text Info */}
+                    <div className="flex flex-col gap-1">
+                      <div className="flex justify-between items-start">
+                        <h3 className="text-white font-bold uppercase tracking-wide text-lg group-hover:text-[#8B4513] transition-colors duration-300 line-clamp-1">
+                          {item.groupName}
+                        </h3>
+                        <span className="text-gray-400 font-mono text-sm ml-4">
+                          ${item.price}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-3 text-xs text-gray-500 font-mono uppercase">
+                        <span>{item.mainCategory}</span>
+                        {item.moreVariantsCount > 0 && (
+                          <>
+                            <span>/</span>
+                            <span className="text-[#8B4513]">{item.moreVariantsCount} + Styles</span>
+                          </>
+                        )}
+                      </div>
+                    </div>
+                  </Link>
+                );
+              })}
+            </div>
+
+            {/* Minimal Pagination */}
+            {totalPages > 1 && (
+              <div className="flex justify-center items-center gap-8 pt-12 border-t border-[#362222]">
+                <button
+                  onClick={() => handlePageChange(currentPage - 1)}
+                  disabled={currentPage === 1}
+                  className="text-gray-500 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed transition-colors uppercase text-sm tracking-widest font-bold"
+                >
+                  Prev
+                </button>
+
+                <span className="text-gray-400 font-mono text-sm">
+                  Page {currentPage} of {totalPages}
+                </span>
+
+                <button
+                  onClick={() => handlePageChange(currentPage + 1)}
+                  disabled={currentPage === totalPages}
+                  className="text-gray-500 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed transition-colors uppercase text-sm tracking-widest font-bold"
+                >
+                  Next
+                </button>
+              </div>
+            )}
+          </section>
+        )}
+      </div>
     </main>
   );
 }

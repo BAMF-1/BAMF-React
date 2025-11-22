@@ -48,23 +48,26 @@ export default function CartDrawer({
 
   if (!mounted) return null;
 
+
+  const handleCheckout = () => () => {
+    window.location.href = "/checkout";
+  }
+
   return createPortal(
     <>
       {/* Backdrop */}
       <div
-        className={`fixed inset-0 w-screen h-screen bg-black transition-opacity duration-300 z-[999] ${
-          isOpen
+        className={`fixed inset-0 w-screen h-screen bg-black transition-opacity duration-300 z-[999] ${isOpen
             ? "opacity-50 pointer-events-auto"
             : "opacity-0 pointer-events-none"
-        }`}
+          }`}
         onClick={onClose}
       />
 
       {/* Desktop: Slide from right */}
       <div
-        className={`not-sm:hidden fixed top-0 right-0 h-screen w-full sm:w-96 shadow-2xl transform transition-transform duration-500 ease-[cubic-bezier(0.25,1,0.5,1)] z-[1000] ${
-          isOpen ? "translate-x-0" : "translate-x-full"
-        }`}
+        className={`not-sm:hidden fixed top-0 right-0 h-screen w-full sm:w-96 shadow-2xl transform transition-transform duration-500 ease-[cubic-bezier(0.25,1,0.5,1)] z-[1000] ${isOpen ? "translate-x-0" : "translate-x-full"
+          }`}
         style={{
           backgroundColor: "#1a1a1a",
           borderLeft: "2px solid #362222",
@@ -269,6 +272,7 @@ export default function CartDrawer({
                 onMouseLeave={(e) =>
                   (e.currentTarget.style.backgroundColor = "#8B4545")
                 }
+                onClick={handleCheckout()}
               >
                 CHECKOUT
               </button>
@@ -279,9 +283,8 @@ export default function CartDrawer({
 
       {/* Mobile Bottom Sheet */}
       <div
-        className={`sm:hidden fixed bottom-0 left-0 right-0 w-full shadow-2xl transform transition-transform duration-500 ease-[cubic-bezier(0.25,1,0.5,1)] z-[1000] rounded-t-2xl ${
-          isOpen ? "translate-y-0" : "translate-y-full"
-        }`}
+        className={`sm:hidden fixed bottom-0 left-0 right-0 w-full shadow-2xl transform transition-transform duration-500 ease-[cubic-bezier(0.25,1,0.5,1)] z-[1000] rounded-t-2xl ${isOpen ? "translate-y-0" : "translate-y-full"
+          }`}
         style={{
           backgroundColor: "#1a1a1a",
           borderTop: "2px solid #362222",

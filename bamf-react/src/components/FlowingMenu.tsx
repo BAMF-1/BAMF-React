@@ -5,6 +5,7 @@ interface MenuItemProps {
   link: string;
   text: string;
   image: string;
+  price?: string;
 }
 
 interface FlowingMenuProps {
@@ -23,7 +24,7 @@ const FlowingMenu: React.FC<FlowingMenuProps> = ({ items = [] }) => {
   );
 };
 
-const MenuItem: React.FC<MenuItemProps> = ({ link, text, image }) => {
+const MenuItem: React.FC<MenuItemProps> = ({ link, text, image, price }) => {
   const itemRef = React.useRef<HTMLDivElement>(null);
   const marqueeRef = React.useRef<HTMLDivElement>(null);
   const marqueeInnerRef = React.useRef<HTMLDivElement>(null);
@@ -101,14 +102,19 @@ const MenuItem: React.FC<MenuItemProps> = ({ link, text, image }) => {
   const contentBlock = React.useMemo(() => {
     return Array.from({ length: 4 }).map((_, idx) => (
       <React.Fragment key={idx}>
-        <span className="text-[#060010] uppercase font-normal text-[4vh] leading-[1.2] whitespace-nowrap shrink-0">
-          {text}
-        </span>
+        <div className='flex flex-col gap-4'>
+          <span className="text-[#060010] uppercase font-normal text-3xl leading-[1.2] whitespace-nowrap shrink-0">
+            {text}
+          </span>
+          <p className="text-[#060010] uppercase font-semibold text-2xl leading-[1.2] whitespace-nowrap shrink-0">
+            {price}
+          </p>
+        </div>
         <div
-          className="w-[200px] h-[7vh] rounded-[50px] bg-cover bg-center shrink-0"
+          className="w-[200px] h-[10vh] rounded-[50px] bg-cover bg-center shrink-0"
           style={{ backgroundImage: `url(${image})` }}
         />
-      </React.Fragment>
+      </React.Fragment >
     ));
   }, [text, image]);
 

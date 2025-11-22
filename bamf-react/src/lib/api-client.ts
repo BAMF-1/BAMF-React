@@ -39,37 +39,21 @@ export type GroupedProductCard = {
   sampleSku?: string;
 };
 
-export type GroupDetail = {
+export interface GroupDetail {
   groupId: string;
-  groupSlug?: string | null;
+  groupSlug: string;
   name: string;
   mainCategory: string;
-  heroImageUrl?: string | null;
+  heroImageUrl: string;
   minPrice: number;
   maxPrice: number;
   inStockAny: boolean;
-  variants: Array<{
-    id: string;
-    sku: string;
-    color?: string | null;
-    size?: string | null;
-    price: number;
-    inStock: boolean;
-    images?: Array<{
-      url: string;
-      altText?: string | null;
-      isPrimary: boolean;
-      sortOrder: number;
-    }>;
-    description?: string | null;
-    brand?: string | null;
-    material?: string | null;
-  }>;
+  variants: VariantDetail[];
   facets: {
-    colors: Array<{ value: string; count: number }>;
-    sizes: Array<{ value: string; count: number }>;
+    colors: { value: string; count: number }[];
+    sizes: { value: string; count: number }[];
   };
-};
+}
 
 export type ProductListingParams = {
   categorySlug: string;
@@ -112,6 +96,20 @@ export interface UserFromToken {
   id?: number;
   email?: string;
   role?: string; // "User" or "Admin"
+}
+
+export interface VariantDetail {
+  id: string;
+  sku: string;
+  color: string;
+  size: string;
+  price: number;
+  inStock: boolean;
+  primaryImageUrl: string;
+  images: string[]; // We will flatten this to strings immediately
+  description: string | null;
+  brand: string | null;
+  material: string | null;
 }
 
 class ApiClient {
@@ -521,24 +519,35 @@ export async function fetchGroupDetail(slugOrId: string, sku?: string): Promise<
     minPrice: raw.minPrice,
     maxPrice: raw.maxPrice,
     inStockAny: raw.inStockAny,
-    variants: (raw.variants || []).map((v: any) => ({
-      id: v.sku,
-      sku: v.sku,
-      color: v.color,
-      size: v.size,
-      price: v.price,
-      inStock: v.inStock,
-      primaryImageUrl: v.primaryImageUrl,
-      description: v.description,
-      brand: v.brand,
-      material: v.material,
-      images: (v.images || []).map((img: any) => ({
-        url: img.url,
-        altText: img.altText,
-        isPrimary: img.isPrimary,
-        sortOrder: img.sortOrder,
-      })),
-    })),
+    variants: (raw.variants || []).map((v: any) => {
+      // 1. Flatten Images: Convert [{url: "..."}] to ["..."]
+      const galleryImages: string[] = (v.images || []).map((img: any) => img.url);
+
+      // 2. Ensure Primary Image is in the gallery list
+      if (v.primaryImageUrl && !galleryImages.includes(v.primaryImageUrl)) {
+        galleryImages.unshift(v.primaryImageUrl);
+      }
+
+      // 3. If no images found at all, try using the Group Hero
+      if (galleryImages.length === 0 && raw.heroImageUrl) {
+        galleryImages.push(raw.heroImageUrl);
+      }
+
+      return {
+        id: v.sku, // Use SKU as ID if ID is missing
+        sku: v.sku,
+        color: v.color,
+        size: v.size,
+        price: v.price,
+        inStock: v.inStock,
+        primaryImageUrl: v.primaryImageUrl,
+        images: galleryImages, 
+        // 4. Direct Mapping (Since raw group doesn't have these, we trust the variant)
+        description: v.description || null,
+        brand: v.brand || null,
+        material: v.material || null,
+      };
+    }),
     facets: {
       colors: raw.colors || [],
       sizes: raw.sizes || [],
