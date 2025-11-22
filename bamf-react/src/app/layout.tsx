@@ -9,6 +9,7 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import { Bounce, ToastContainer } from "react-toastify";
 import { CartProvider } from "@/contexts/CartContext";
 import { GoogleAnalytics } from "@next/third-parties/google";
+import { Suspense } from "react";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -38,37 +39,39 @@ export default function RootLayout({
       >
         <AuthProvider>
           <CartProvider>
-            <LoadingBar />
-            <div
-              id="blurOverlay"
-              className="fixed inset-0 w-full h-full backdrop-blur-sm transition-opacity duration-300 cursor-pointer"
-              style={{
-                zIndex: 39,
-                opacity: 0,
-                pointerEvents: 'none',
-                backgroundColor: 'rgba(0, 0, 0, 0.3)'
-              }}
-            />
-            <Navbar />
-            {children}
-            <Footer />
-            <ToastContainer
-              position="top-right"
-              autoClose={5000}
-              hideProgressBar={false}
-              newestOnTop={false}
-              closeOnClick
-              rtl={false}
-              pauseOnFocusLoss
-              draggable
-              pauseOnHover
-              theme="dark"
-              transition={Bounce}
-            />
+            <Suspense>
+              <LoadingBar />
+              <div
+                id="blurOverlay"
+                className="fixed inset-0 w-full h-full backdrop-blur-sm transition-opacity duration-300 cursor-pointer"
+                style={{
+                  zIndex: 39,
+                  opacity: 0,
+                  pointerEvents: 'none',
+                  backgroundColor: 'rgba(0, 0, 0, 0.3)'
+                }}
+              />
+              <Navbar />
+              {children}
+              <Footer />
+              <ToastContainer
+                position="top-right"
+                autoClose={5000}
+                hideProgressBar={false}
+                newestOnTop={false}
+                closeOnClick
+                rtl={false}
+                pauseOnFocusLoss
+                draggable
+                pauseOnHover
+                theme="dark"
+                transition={Bounce}
+              />
+            </Suspense>
           </CartProvider>
         </AuthProvider>
         <GoogleAnalytics gaId={process.env.GA_MEASUREMENT_ID || ""} />
       </body>
-    </html>
+    </html >
   );
 }
