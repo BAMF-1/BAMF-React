@@ -10,7 +10,7 @@ import Waves from "./Waves";
 import FlowingMenu from "./FlowingMenu";
 import CurvedLoop from "./CurvedLoop";
 import { itemService } from "@/lib/services/adminServices";
-import ScrollStackSection from "./ScrollStackSection";
+import GlareHover from "./GlareHover";
 
 export default function HomePage() {
     const [email, setEmail] = useState("");
@@ -20,6 +20,33 @@ export default function HomePage() {
         { name: "Studded Belt", price: "$49", image: "https://picsum.photos/600/400?random=2", link: "/shop" },
         { name: "Band T-Shirt", price: "$29", image: "https://picsum.photos/600/400?random=3", link: "/shop" },
         { name: "Spiked Wristband", price: "$19", image: "https://picsum.photos/600/400?random=4", link: "/shop" },
+    ];
+
+    const categories = [
+        {
+            title: "TOPS",
+            description: "Leather jackets, denim vests, and rugged outerwear that define your rebellious style.",
+            href: "/shop/tops",
+            accentColor: "#8B4513",
+        },
+        {
+            title: "BOTTOMS",
+            description: "Distressed jeans, leather pants, and edgy skirts that complete your look with attitude.",
+            href: "/shop/bottoms",
+            accentColor: "#C0C0C0",
+        },
+        {
+            title: "ACCESSORIES",
+            description: "Bold accessories like studded belts, statement jewelry, and rugged bags to elevate your ensemble.",
+            href: "/shop/accessories",
+            accentColor: "#1C1C1C",
+        },
+        {
+            title: "FOOTWEAR",
+            description: "Boots and shoes that combine durability with rebellious style for every step you take.",
+            href: "/shop/footwear",
+            accentColor: "#654321",
+        }
     ];
 
     const [featuredProducts, setFeaturedProducts] = useState<Array<{ link: string, name: string; price: string; image: string }>>(demoItems);
@@ -57,7 +84,7 @@ export default function HomePage() {
 
             {/* Hero Section */}
             <section
-                className="h-[92.5vh] relative px-6 py-24 md:py-32 overflow-hidden"
+                className="h-screen relative px-6 py-24 md:py-32 overflow-hidden"
                 style={{ backgroundColor: "#171010" }}
             >
                 <div className="max-w-7xl mx-auto relative z-10">
@@ -90,7 +117,7 @@ export default function HomePage() {
 
                         />
 
-                        <div className="flex flex-col sm:flex-row gap-4">
+                        <div className="flex flex-col sm:flex-row gap-12 sm:gap-4">
                             <AnimatedContent
                                 delay={1.5}
                                 distance={25}
@@ -137,7 +164,7 @@ export default function HomePage() {
             </section>
 
             {/* Featured Products */}
-            <section className="min-h-[92.5vh] relative" style={{ backgroundColor: "#2B2B2B" }}>
+            <section className="min-h-screen relative" style={{ backgroundColor: "#2B2B2B" }}>
                 {/* Background DotGrid */}
                 <div className="absolute inset-0">
                     <Waves
@@ -154,7 +181,7 @@ export default function HomePage() {
                         yGap={36}
                     />
                 </div>
-                <div className="relative z-10 h-[92.5vh] flex flex-col items-center w-full pt-12">
+                <div className="relative z-10 h-screen flex flex-col items-center w-full pt-12">
                     <CurvedLoop
                         marqueeText="FEATURED PRODUCTS ✦ FEATURED PRODUCTS ✦ FEATURED PRODUCTS ✦ FEATURED PRODUCTS ✦ "
                         className="text-white text-lg font-semibold underline-offset-4"
@@ -173,7 +200,75 @@ export default function HomePage() {
             </section>
 
             {/* Categories */}
-            <ScrollStackSection />
+            {/* <ScrollStackSection /> */}
+            <section className="py-20 px-6" style={{ backgroundColor: "#171010" }}>
+                <div className="max-w-7xl mx-auto">
+                    <h2 className="text-3xl font-bold text-white mb-12 text-center">SHOP BY CATEGORY</h2>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-12">
+                        {
+                            categories.map((category) => (
+                                <Link href={category.href} key={category.title} className="block group">
+                                    <GlareHover
+                                        width="100%"
+                                        height="160px"
+                                        background="#2B2B2B"
+                                        borderRadius="4px"
+                                        borderColor="#423F3E"
+                                        glareColor="#ffffff"
+                                        glareOpacity={0.25}
+                                        glareAngle={60}
+                                        transitionDuration={900}
+                                        className="transition-all duration-300 group-hover:border-[#8B4513]!"
+                                    >
+                                        {/* Accent bar */}
+                                        <div
+                                            className="absolute top-0 left-0 w-full h-0.5"
+                                            style={{ backgroundColor: category.accentColor }}
+                                        />
+
+                                        {/* Content Container */}
+                                        <div className="relative h-full flex items-center px-6 py-5">
+                                            <div className="flex-1 pr-4">
+                                                <h3 className="text-xl font-bold text-white mb-1.5 tracking-wider">
+                                                    {category.title}
+                                                </h3>
+                                                <p className="text-gray-400 leading-relaxed line-clamp-2 text-xl">
+                                                    {category.description}
+                                                </p>
+                                            </div>
+
+                                            {/* Arrow */}
+                                            <div className="shrink-0 group-hover:translate-x-1 transition-transform duration-300">
+                                                <svg
+                                                    className="w-6 h-6 text-white"
+                                                    fill="none"
+                                                    stroke="currentColor"
+                                                    viewBox="0 0 24 24"
+                                                >
+                                                    <path
+                                                        strokeLinecap="round"
+                                                        strokeLinejoin="round"
+                                                        strokeWidth={2.5}
+                                                        d="M17 8l4 4m0 0l-4 4m4-4H3"
+                                                    />
+                                                </svg>
+                                            </div>
+                                        </div>
+
+                                        {/* Gradient overlay on hover */}
+                                        <div
+                                            className="absolute inset-0 opacity-0 group-hover:opacity-5 transition-opacity duration-300 pointer-events-none"
+                                            style={{
+                                                background: `linear-gradient(90deg, ${category.accentColor} 0%, transparent 100%)`
+                                            }}
+                                        />
+                                    </GlareHover>
+                                </Link>
+                            ))
+                        }
+                    </div>
+                </div>
+            </section>
 
             {/* Newsletter */}
             <section className="px-6 py-20" style={{ backgroundColor: "#362222" }}>

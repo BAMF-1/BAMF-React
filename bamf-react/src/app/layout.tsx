@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import Navbar from "@/components/navbar";
 import Footer from "@/components/footer";
+import LoadingBar from "./LoadingBar";
 // @ts-ignore: Allow side-effect import of global CSS without module declarations
 import "./globals.css";
 import { AuthProvider } from "@/contexts/AuthContext";
@@ -37,24 +38,31 @@ export default function RootLayout({
       >
         <AuthProvider>
           <CartProvider>
+            <LoadingBar />
             <div
               id="blurOverlay"
-              className="fixed w-full h-full backdrop-blur-sm z-25 hidden"
+              className="fixed inset-0 w-full h-full backdrop-blur-sm transition-opacity duration-300 cursor-pointer"
+              style={{
+                zIndex: 39,
+                opacity: 0,
+                pointerEvents: 'none',
+                backgroundColor: 'rgba(0, 0, 0, 0.3)'
+              }}
             />
             <Navbar />
             {children}
             <Footer />
             <ToastContainer
-              position="top-left"
+              position="top-right"
               autoClose={5000}
               hideProgressBar={false}
               newestOnTop={false}
-              closeOnClick={false}
+              closeOnClick
               rtl={false}
               pauseOnFocusLoss
               draggable
               pauseOnHover
-              theme="light"
+              theme="dark"
               transition={Bounce}
             />
           </CartProvider>

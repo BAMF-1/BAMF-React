@@ -8,13 +8,12 @@ export default function CartButton() {
     const [isOpen, setIsOpen] = useState(false);
 
     return (
-        <div>
-            {/* Enhanced Cart Button */}
+        <div className="w-full">
             <button
-                className="relative px-5 py-2.5 text-sm font-bold text-white border-2 transition-all duration-300 hover:scale-105 hover:cursor-pointer active:scale-95 group"
+                className="relative w-full px-5 py-3 text-sm font-bold text-white border-2 transition-all duration-300 hover:scale-[1.02] active:scale-95 group overflow-hidden"
                 style={{
                     borderColor: "#362222",
-                    backgroundColor: "#2B2B2B"
+                    backgroundColor: "#2B2B2B",
                 }}
                 onMouseEnter={(e) => {
                     e.currentTarget.style.backgroundColor = "#362222";
@@ -26,24 +25,26 @@ export default function CartButton() {
                 }}
                 onClick={() => setIsOpen(true)}
             >
-                <span className="relative z-10 flex items-center gap-2">
-                    🛒
+                <span className="relative z-10 flex items-center justify-center gap-2">
+                    <span className="text-lg">🛒</span>
                     <span className="tracking-wider">CART</span>
+                    {totalItems > 0 && (
+                        <span
+                            className="ml-1 px-2 py-0.5 text-xs font-bold rounded-full"
+                            style={{ backgroundColor: "#8B4545" }}
+                        >
+                            {totalItems}
+                        </span>
+                    )}
                 </span>
-                {totalItems > 0 && (
-                    <span
-                        className="absolute -top-2 -right-2 w-6 h-6 flex items-center justify-center text-xs font-bold text-white rounded-full animate-pulse"
-                        style={{ backgroundColor: "#8B4545" }}
-                    >
-                        {totalItems}
-                    </span>
-                )}
+
+                {/* Animated hover overlay */}
                 <span
-                    className="absolute inset-0 w-0 transition-all duration-300 group-hover:w-full"
-                    style={{ backgroundColor: "rgba(139, 69, 69, 0.2)" }}
+                    className="absolute inset-0 w-0 transition-all duration-300 ease-out group-hover:w-full"
+                    style={{ backgroundColor: "rgba(139, 69, 69, 0.15)" }}
                 />
             </button>
-            {/* Cart Drawer */}
+
             <CartDrawer isOpen={isOpen} onClose={() => setIsOpen(false)} />
         </div>
     );
