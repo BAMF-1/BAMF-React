@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import Navbar from "@/components/navbar";
-import Footer from "@/components/footer";
+import ConditionalFooter from "@/components/ConditionalFooter";
 import LoadingBar from "./LoadingBar";
 // @ts-ignore: Allow side-effect import of global CSS without module declarations
 import "./globals.css";
@@ -25,6 +25,10 @@ export const metadata: Metadata = {
   title: "BAMF - Alternative Fashion",
   description: "Premium biker, emo, and leather clothing",
 };
+
+// lets disable footer for specific pages like admin and checkout
+
+
 
 export default function RootLayout({
   children,
@@ -53,7 +57,7 @@ export default function RootLayout({
               />
               <Navbar />
               {children}
-              <Footer />
+              <ConditionalFooter />
               <ToastContainer
                 position="top-left"
                 autoClose={5000}

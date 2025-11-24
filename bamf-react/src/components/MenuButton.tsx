@@ -6,7 +6,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import Link from "next/link";
 import LoginAndRegister from "./Popups/LoginAndRegister";
 
-export default function LoginButton() {
+export default function MenuButton() {
   const { isAuthenticated, user, logout, showLoginPopup, setShowLoginPopup, isLoading } = useAuth();
   const [loginOrSignup, setLoginOrSignup] = useState<"login" | "signup">("login");
   const [dropdownOpen, setDropdownOpen] = useState(false);
