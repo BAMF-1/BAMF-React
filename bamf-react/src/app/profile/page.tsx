@@ -7,6 +7,8 @@ import AccountSettings from "@/components/Profile/AccountSettings";
 import DangerZone from "@/components/Profile/DangerZone";
 import OrderHistory from "@/components/Profile/OrderHistory";
 import { userService } from "@/services/user.service";
+import Waves from "@/components/Waves";
+import AnimatedContent from "@/components/AnimatedContent";
 
 const ProfilePage = () => {
   const { user, isLoading } = useAuth();
@@ -24,7 +26,6 @@ const ProfilePage = () => {
         router.push("/admin");
       } else {
         setEmail(user.email);
-        console.log("Profile page, user email:", user.email);
       }
     }
   }, [user, isLoading, router]);
@@ -32,9 +33,8 @@ const ProfilePage = () => {
   // Fetch order history
   useEffect(() => {
     const fetchOrderHistory = async () => {
-      if (user && user.role !== "Admin") {
+      if (user && user.role !== "Admin" && email) {
         setOrdersLoading(true);
-        console.log("profile, email:", email);
         const response = await userService.getOrderHistory(email);
         if (response.data) {
           setOrderHistory(response.data);
@@ -43,26 +43,60 @@ const ProfilePage = () => {
           setOrderHistory([]);
         }
         setOrdersLoading(false);
-        console.log("Order history updated:", response.data);
       }
     };
 
-    fetchOrderHistory();
-  }, [email,user]);
+    if (email) {
+      fetchOrderHistory();
+    }
+  }, [email, user]);
 
   // Show a loading state or redirecting state
   if (isLoading || !user || user.role === "Admin") {
-    return <div className="min-h-screen bg-[#1a1a1a]" />;
+    return (
+      <div className="min-h-screen bg-[#171010] flex items-center justify-center">
+        {/* Optional: Add a loader here */}
+      </div>
+    );
   }
 
   return (
-    <div className="min-h-screen bg-[#171010] text-white">
-      <div className="max-w-6xl mx-auto px-4 py-12">
-        <ProfileHeader />
-        <AccountSettings email={email} setEmail={setEmail} />
-        <DangerZone />
-        <OrderHistory orders={orderHistory} isLoading={ordersLoading} />
-      </div>
+    <div
+      className="min-h-screen overflow-hidden"
+      style={{ backgroundColor: "#171010" }}
+    >
+      {/* Waves background */}
+      <section className="relative flex items-center py-24 overflow-hidden">
+        <div className="absolute inset-0 z-0 opacity-20 pointer-events-none">
+          <Waves
+            lineColor="#362222"
+            backgroundColor="transparent"
+            waveSpeedX={0.02}
+            waveSpeedY={0.01}
+            waveAmpX={40}
+            waveAmpY={20}
+            friction={0.9}
+            tension={0.01}
+            maxCursorMove={0}
+            xGap={12}
+            yGap={36}
+          />
+        </div>
+        <div className=""></div>
+        {/* Main Content */}
+        <div className="space-y-8 md:space-y-12 max-w-7xl mx-auto px-4 md:px-6 relative z-10">
+          <ProfileHeader />
+          <AnimatedContent delay={0.2} distance={30}>
+            <AccountSettings email={email} setEmail={setEmail} />
+          </AnimatedContent>
+          <AnimatedContent delay={0.3} distance={30}>
+            <OrderHistory orders={orderHistory} isLoading={ordersLoading} />
+          </AnimatedContent>
+          <AnimatedContent delay={0.4} distance={30}>
+            <DangerZone />
+          </AnimatedContent>
+        </div>
+      </section>
     </div>
   );
 };

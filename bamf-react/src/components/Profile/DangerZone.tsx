@@ -12,12 +12,10 @@ const DangerZone = () => {
   const [isLoading, setIsLoading] = useState(false);
 
   const handleDelete = async () => {
-    // Validate password
     if (!password) {
       toast.error("Password is required to delete your account");
       return;
     }
-    // Proceed with deletion
     setIsLoading(true);
     const response = await userService.deleteAccount(password);
 
@@ -38,17 +36,17 @@ const DangerZone = () => {
   };
 
   return (
-    <div className="rounded-xl p-10 mb-10 bg-[#2B2B2B] border-2 border-[#ff4444] border-opacity-30">
-      <div className="flex items-start gap-4 mb-6">
+    <div className="p-4 md:p-10 bg-[#2B2B2B] border-2 border-[#4d2222]">
+      <div className="flex items-start gap-2 md:gap-4 mb-4 md:mb-6">
         <AlertTriangle
-          className="w-7 h-7 text-[#ff4444] shrink-0 mt-1"
-          strokeWidth={2.5}
+          className="w-6 h-6 md:w-7 md:h-7 text-[#ff4444] shrink-0 mt-1"
+          strokeWidth={2}
         />
         <div>
-          <h2 className="text-3xl font-bold text-white mb-2 tracking-tight">
+          <h2 className="text-xl md:text-3xl font-bold text-white mb-2 tracking-tight">
             Danger Zone
           </h2>
-          <p className="text-gray-400 text-base leading-relaxed">
+          <p className="text-sm md:text-base text-gray-400 leading-relaxed">
             Once you delete your account, there is no going back. Please be
             certain.
           </p>
@@ -57,7 +55,7 @@ const DangerZone = () => {
       <button
         onClick={() => setShowDeleteModal(true)}
         disabled={isLoading}
-        className="px-8 py-3.5 rounded-lg border-2 border-[#ff4444] text-[#ff4444] hover:bg-[#ff4444] hover:text-white font-bold transition-all hover:scale-105 active:scale-95 uppercase tracking-wide disabled:opacity-50 disabled:cursor-not-allowed"
+        className="px-4 md:px-8 py-3 md:py-4 w-full md:w-auto border-2 border-[#ff4444] text-[#ff4444] hover:bg-[#ff4444] hover:text-white font-bold transition-all active:scale-95 uppercase tracking-widest text-sm disabled:opacity-50 disabled:cursor-not-allowed"
       >
         Delete Account
       </button>
@@ -68,21 +66,21 @@ const DangerZone = () => {
           onClick={handleCloseModal}
         >
           <div
-            className="rounded-xl p-10 max-w-md w-full bg-[#2B2B2B] border-2 border-[#ff4444] shadow-2xl"
+            className="p-6 md:p-10 max-w-md w-full bg-[#171010] border-2 border-[#ff4444] shadow-2xl"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="flex items-center gap-3 mb-6">
+            <div className="flex items-center gap-4 mb-6">
               <AlertTriangle
                 className="w-8 h-8 text-[#ff4444]"
                 strokeWidth={2.5}
               />
               <h3 className="text-2xl font-bold text-white">Delete Account</h3>
             </div>
-            <p className="text-gray-300 mb-6 leading-relaxed">
+            <p className="text-gray-300 mb-8 leading-relaxed">
               This action cannot be undone. Enter your password to confirm
-              account deletion:
+              account deletion.
             </p>
-            <div className="relative mb-6">
+            <div className="relative mb-8">
               <input
                 type={showPassword ? "text" : "password"}
                 value={password}
@@ -90,8 +88,8 @@ const DangerZone = () => {
                   setPassword(e.target.value);
                 }}
                 disabled={isLoading}
-                placeholder="Enter your password"
-                className="w-full px-5 py-3.5 pr-12 rounded-lg text-white font-medium bg-[#362222] border-2 border-[#4a3535] focus:outline-none focus:ring-2 focus:ring-[#ff4444] disabled:opacity-50 disabled:cursor-not-allowed"
+                placeholder="ENTER YOUR PASSWORD"
+                className="w-full px-5 py-4 pr-12 bg-[#0f0a0a] text-white placeholder-gray-600 border-2 border-[#423F3E] focus:border-[#ff4444] outline-none transition-colors font-mono uppercase text-sm disabled:opacity-50"
               />
               <button
                 onClick={() => setShowPassword(!showPassword)}
@@ -102,18 +100,18 @@ const DangerZone = () => {
                 {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
               </button>
             </div>
-            <div className="flex gap-3">
+            <div className="flex flex-col md:flex-row gap-4">
               <button
                 onClick={handleDelete}
                 disabled={isLoading}
-                className="flex-1 px-6 py-3.5 rounded-lg bg-[#ff4444] hover:bg-[#cc0000] text-white font-bold transition-all hover:scale-105 active:scale-95 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex-1 px-6 py-4 bg-[#ff4444] hover:bg-[#cc0000] text-white font-bold transition-all active:scale-95 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed uppercase tracking-widest text-sm"
               >
                 {isLoading ? "Deleting..." : "Delete Forever"}
               </button>
               <button
                 onClick={handleCloseModal}
                 disabled={isLoading}
-                className="flex-1 px-6 py-3.5 rounded-lg bg-[#423F3E] hover:bg-[#504d4c] text-gray-300 font-semibold transition-all hover:scale-105 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex-1 px-6 py-4 bg-[#423F3E] hover:bg-[#504d4c] text-gray-300 font-semibold transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed uppercase tracking-widest text-sm"
               >
                 Cancel
               </button>

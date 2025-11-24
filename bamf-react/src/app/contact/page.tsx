@@ -134,7 +134,7 @@ export default function ContactPage() {
 
                       <div className="text-4xl mb-6">{method.icon}</div>
                       <h3 className="text-2xl font-bold text-white mb-2 tracking-wider">{method.title}</h3>
-                      <p className="text-gray-400 mb-8 flex-grow">{method.desc}</p>
+                      <p className="text-gray-400 mb-8 grow">{method.desc}</p>
 
                       <div className="text-white font-bold border-b border-transparent group-hover:border-white inline-block self-start transition-all">
                         {method.action}
