@@ -18,17 +18,6 @@ export default function LoginButton() {
   useEffect(() => {
     // 2. Set mounted to true only after the component runs on the client
     setIsMounted(true);
-
-    console.log('🔐 Auth State:', {
-      isAuthenticated,
-      isAdmin: user?.role?.toLocaleLowerCase() === 'admin',
-      user,
-      userRole: user?.role,
-      tokens: {
-        access: localStorage.getItem('accessToken'),
-        refresh: localStorage.getItem('refreshToken')
-      }
-    });
   }, [isAuthenticated, user]);
 
   useEffect(() => {

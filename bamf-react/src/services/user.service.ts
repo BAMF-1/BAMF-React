@@ -119,9 +119,6 @@ export const userService = {
     async deleteAccount(password: string): Promise<ApiResponse<string>> {
         try {
             const payload = { password };
-            console.log('Sending delete request with payload:', payload);
-            console.log('Password length:', password.length);
-            console.log('Password value:', password);
             
             return await apiClient.delete<string>('/api/UserProfile', { 
                 data: payload
@@ -135,7 +132,6 @@ export const userService = {
     // Get users order history by email
     async getOrderHistory(email: string): Promise<ApiResponse<any[]>> {
         try {
-            console.log('Fetching order history for email:', email);
             if (!email) {
                 return { error: 'Email is required to fetch order history', status: 400 };
             }

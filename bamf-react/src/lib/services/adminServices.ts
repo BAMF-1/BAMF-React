@@ -17,13 +17,13 @@ export interface User {
 
 export interface Review {
     id: number;
-    productGroupId: string; // changed from productId
+    productGroupSlug: string;
     rating: number;
     title: string;
     comment: string;
     createdUtc: string;
     updatedUtc?: string | null;
-    productGroup?: ProductGroup; // nested object
+    productGroup?: ProductGroup;
 }
 
 export interface Item {
@@ -146,9 +146,9 @@ export const reviewService = {
     getByProduct: (productId: number) =>
         apiClient.get<Review[]>(`/api/Reviews/product/${productId}`),
     getByGroup: (groupSlug: string) =>
-        apiClient.get<Review[]>(`/api/Reviews/product-group/${encodeURIComponent(groupSlug)}`), //https://localhost:7039/api/Reviews/product-group/sport-cap-classic'
-    create: (productId: number, rating: number, title: string, comment: string) =>
-        apiClient.post<Review>(`/api/Reviews`, { productId, rating, title, comment }),
+        apiClient.get<Review[]>(`/api/Reviews/product-group/${encodeURIComponent(groupSlug)}`),
+    create: (productGroupSlug: string, rating: number, title: string, comment: string) =>
+        apiClient.post<Review>(`/api/Reviews`, { productGroupSlug, rating, title, comment }),
     update: (id: number, rating?: number, title?: string, comment?: string) => {
         const body: { rating?: number; title?: string; comment?: string } = {};
         if (rating !== undefined) body.rating = rating;

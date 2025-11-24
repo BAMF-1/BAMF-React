@@ -29,8 +29,6 @@ function extractUserFromToken(token: string): UserFromToken {
     const email = claims['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress'];
     const role = claims['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'];
 
-    console.log('🔐 JWT Claims Extracted:', { id, email, role });
-
     return {
         id: parseInt(id || '0'),
         email: email || '',
@@ -119,7 +117,6 @@ export const authService = {
                 const token = localStorage.getItem('accessToken');
                 if (token) {
                     const user = extractUserFromToken(token);
-                    console.log('✅ Auth Check - User:', user);
                     return { data: user, status: 200 };
                 }
             }

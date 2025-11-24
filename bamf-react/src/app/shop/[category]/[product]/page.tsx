@@ -9,6 +9,8 @@ import {
 } from "@/lib/api-client";
 import OpenAiPopup from "./openAiPopup";
 import ProductReviews from "./productReviews";
+import { useAuth } from "@/contexts/AuthContext";
+import CreateReviewSection from "./CreateReviewSection";
 
 type Props = {
   params: Promise<{ category: string; product: string }>;
@@ -34,7 +36,6 @@ export default async function ProductPage({ params, searchParams }: Props) {
   let group;
   try {
     group = await fetchGroupDetail(productSlug, sku);
-    console.log("Fetched group detail:", group);
   } catch (err) {
     notFound();
   }
@@ -103,7 +104,11 @@ export default async function ProductPage({ params, searchParams }: Props) {
           />
         </div>
 
-        <div className="mt-24 pt-12 border-t border-[#362222]">
+        <div className="mt-8">
+          <CreateReviewSection groupSlug={group.groupSlug} />
+        </div>
+
+        <div className="mt-4 pt-4 border-t border-[#362222]">
           <ProductReviews groupSlug={group.groupSlug} />
         </div>
 

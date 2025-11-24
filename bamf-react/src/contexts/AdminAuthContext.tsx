@@ -31,7 +31,6 @@ export const AdminAuthProvider: React.FC<{ children: ReactNode }> = ({ children 
             // Get admin user from token
             const userResponse = await authService.checkAuth();
             if (userResponse.data) {
-                console.log("Admin user retrieved:", userResponse.data);
                 setAdmin(true);
                 return { success: true };
             }

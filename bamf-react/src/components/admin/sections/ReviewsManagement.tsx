@@ -79,10 +79,10 @@ export default function ReviewsManagement() {
 
     const handleSave = async (item: Review | null, onClose: () => void) => {
         try {
-            const { productGroupId, rating, title, comment } = formData;
+            const { productGroupSlug, rating, title, comment } = formData;
 
-            if (!rating || !title || !comment || (!item?.id && !productGroupId)) {
-                toast.error('Product ID (for new), Rating, Title, and Comment are required.');
+            if (!rating || !title || !comment || (!item?.id && !productGroupSlug)) {
+                toast.error('Product Group Slug (for new), Rating, Title, and Comment are required.');
                 return;
             }
 
@@ -95,7 +95,7 @@ export default function ReviewsManagement() {
                 toast.success('Review updated successfully');
             } else {
                 const response = await reviewService.create(
-                    Number(productGroupId),
+                    String(productGroupSlug),
                     Number(rating),
                     String(title),
                     String(comment)
@@ -118,9 +118,9 @@ export default function ReviewsManagement() {
     const columns: Column<Review>[] = [
         { key: 'id', label: 'ID' },
         {
-            key: 'productGroupId',
+            key: 'productGroupSlug',
             label: 'Product Group Id',
-            render: (item) => `ID: #${item.productGroupId}`
+            render: (item) => `ID: #${item.productGroupSlug}`
         },
         {
             key: 'rating',
@@ -185,10 +185,10 @@ export default function ReviewsManagement() {
                 >
                     <FormField
                         label="Product ID"
-                        name="productGroupId"
+                        name="productGroupSlug"
                         type="number"
-                        value={formData.productGroupId}
-                        onChange={(val) => setFormData({ ...formData, productGroupId: val })}
+                        value={formData.productGroupSlug}
+                        onChange={(val) => setFormData({ ...formData, productGroupSlug: val })}
                         required
                     />
                     <FormField
