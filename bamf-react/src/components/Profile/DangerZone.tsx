@@ -41,7 +41,7 @@ const DangerZone = () => {
     <div className="rounded-xl p-10 mb-10 bg-[#2B2B2B] border-2 border-[#ff4444] border-opacity-30">
       <div className="flex items-start gap-4 mb-6">
         <AlertTriangle
-          className="w-7 h-7 text-[#ff4444] flex-shrink-0 mt-1"
+          className="w-7 h-7 text-[#ff4444] shrink-0 mt-1"
           strokeWidth={2.5}
         />
         <div>
