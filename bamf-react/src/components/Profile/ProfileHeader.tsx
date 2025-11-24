@@ -16,7 +16,7 @@ const ProfileHeader = () => (
     <AnimatedContent delay={0.4} distance={30}>
       <div className="h-1 w-16 md:w-24 bg-[#8B4513] mb-6 md:mb-8"></div>
       <p className="text-base md:text-xl text-gray-300 max-w-lg leading-relaxed">
-        Manage your account settings, view order history, and make changes to
+        Manage your account, view order history, and make changes to
         your credentials.
       </p>
     </AnimatedContent>

@@ -62,8 +62,7 @@ const ProfilePage = () => {
 
   return (
     <div
-      className="min-h-screen min-w-8/10 overflow-hidden"
-      style={{ backgroundColor: "#171010" }}
+      className="min-h-screen min-w-8/10 overflow-hidden bg-[#171010]"
     >
       {/* Waves background */}
       <section className="relative flex items-center py-24 overflow-hidden">
