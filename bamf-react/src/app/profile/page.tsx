@@ -6,51 +6,16 @@ import ProfileHeader from "@/components/Profile/ProfileHeader";
 import AccountSettings from "@/components/Profile/AccountSettings";
 import DangerZone from "@/components/Profile/DangerZone";
 import OrderHistory from "@/components/Profile/OrderHistory";
+import { userService } from "@/services/user.service";
+import Waves from "@/components/Waves";
+import AnimatedContent from "@/components/AnimatedContent";
 
 const ProfilePage = () => {
   const { user, isLoading } = useAuth();
   const router = useRouter();
   const [email, setEmail] = useState("");
-
-  // Mock order history data, until integrated with backend
-  const [orderHistory] = useState([
-    {
-      id: "ORD-2024-001",
-      date: "2024-10-01",
-      total: 149.99,
-      status: "Delivered",
-      items: 3,
-      image:
-        "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400&h=400&fit=crop",
-    },
-    {
-      id: "ORD-2024-002",
-      date: "2024-09-28",
-      total: 89.5,
-      status: "Delivered",
-      items: 2,
-      image:
-        "https://images.unsplash.com/photo-1572635196237-14b3f281503f?w=400&h=400&fit=crop",
-    },
-    {
-      id: "ORD-2024-003",
-      date: "2024-09-15",
-      total: 299.99,
-      status: "Delivered",
-      items: 1,
-      image:
-        "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400&h=400&fit=crop",
-    },
-    {
-      id: "ORD-2024-004",
-      date: "2024-08-22",
-      total: 179.99,
-      status: "Delivered",
-      items: 4,
-      image:
-        "https://images.unsplash.com/photo-1560343090-f0409e92791a?w=400&h=400&fit=crop",
-    },
-  ]);
+  const [orderHistory, setOrderHistory] = useState<any[]>([]);
+  const [ordersLoading, setOrdersLoading] = useState(true);
 
   // Redirect based on authentication and role
   useEffect(() => {
@@ -65,19 +30,72 @@ const ProfilePage = () => {
     }
   }, [user, isLoading, router]);
 
+  // Fetch order history
+  useEffect(() => {
+    const fetchOrderHistory = async () => {
+      if (user && user.role !== "Admin" && email) {
+        setOrdersLoading(true);
+        const response = await userService.getOrderHistory(email);
+        if (response.data) {
+          setOrderHistory(response.data);
+        } else {
+          console.error("Failed to fetch order history:", response.error);
+          setOrderHistory([]);
+        }
+        setOrdersLoading(false);
+      }
+    };
+
+    if (email) {
+      fetchOrderHistory();
+    }
+  }, [email, user]);
+
   // Show a loading state or redirecting state
   if (isLoading || !user || user.role === "Admin") {
-    return <div className="min-h-screen bg-[#1a1a1a]" />; 
+    return (
+      <div className="min-h-screen bg-[#171010] flex items-center justify-center">
+        {/* Optional: Add a loader here */}
+      </div>
+    );
   }
 
   return (
-    <div className="min-h-screen bg-[#171010] text-white">
-      <div className="max-w-6xl mx-auto px-4 py-12">
-        <ProfileHeader />
-        <AccountSettings email={email} setEmail={setEmail} />
-        <DangerZone />
-        <OrderHistory orders={orderHistory} />
-      </div>
+    <div
+      className="min-h-screen min-w-8/10 overflow-hidden bg-[#171010]"
+    >
+      {/* Waves background */}
+      <section className="relative flex items-center py-24 overflow-hidden">
+        <div className="absolute inset-0 z-0 opacity-20 pointer-events-none">
+          <Waves
+            lineColor="#362222"
+            backgroundColor="transparent"
+            waveSpeedX={0.02}
+            waveSpeedY={0.01}
+            waveAmpX={40}
+            waveAmpY={20}
+            friction={0.9}
+            tension={0.01}
+            maxCursorMove={0}
+            xGap={12}
+            yGap={36}
+          />
+        </div>
+        <div className=""></div>
+        {/* Main Content */}
+        <div className="space-y-8 md:space-y-12 max-w-7xl mx-auto px-4 md:px-6 relative z-10 min-w-7/10">
+          <ProfileHeader />
+          <AnimatedContent delay={0.2} distance={30}>
+            <AccountSettings email={email} setEmail={setEmail} />
+          </AnimatedContent>
+          <AnimatedContent delay={0.3} distance={30}>
+            <OrderHistory orders={orderHistory} isLoading={ordersLoading} />
+          </AnimatedContent>
+          <AnimatedContent delay={0.4} distance={30}>
+            <DangerZone />
+          </AnimatedContent>
+        </div>
+      </section>
     </div>
   );
 };

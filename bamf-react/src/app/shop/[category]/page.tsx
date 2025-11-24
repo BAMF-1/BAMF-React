@@ -51,17 +51,19 @@ export default async function CategoryPage(props: Props) {
   ).sort((a, b) => a.localeCompare(b, undefined, { numeric: true }));
 
   return (
-    <main className="min-h-screen pb-24" style={{ backgroundColor: '#171010' }}>
-
+    <main className="min-h-screen pb-24" style={{ backgroundColor: "#171010" }}>
       {/* Header Section */}
       <div className="pt-32 pb-8 px-4 md:px-8 border-b border-[#362222]">
         <div className="container mx-auto">
           <div className="mb-6 opacity-60">
             <Breadcrumbs
               items={[
-                { label: 'HOME', href: '/' },
-                { label: 'SHOP', href: '/shop' },
-                { label: category?.name?.toUpperCase() || categorySlug.toUpperCase() },
+                { label: "HOME", href: "/" },
+                { label: "SHOP", href: "/shop" },
+                {
+                  label:
+                    category?.name?.toUpperCase() || categorySlug.toUpperCase(),
+                },
               ]}
             />
           </div>
@@ -71,7 +73,8 @@ export default async function CategoryPage(props: Props) {
               {category?.name || categorySlug}
             </h1>
             <div className="font-mono text-gray-400 text-sm tracking-widest uppercase mb-2">
-              {groupedProducts.length} {groupedProducts.length === 1 ? 'Product' : 'Products'} Found
+              {groupedProducts.length}{" "}
+              {groupedProducts.length === 1 ? "Product" : "Products"} Found
             </div>
           </div>
         </div>
@@ -79,18 +82,25 @@ export default async function CategoryPage(props: Props) {
 
       <div className="container mx-auto px-4 md:px-8 py-12">
         <div className="grid grid-cols-1 lg:grid-cols-[260px,1fr] gap-12">
-
           {/* Sidebar Filters - Sticky for better UX */}
           <aside className="lg:top-24 h-fit z-10">
-            <ListingFilters availableColors={availableColors} availableSizes={availableSizes} />
+            <ListingFilters
+              availableColors={availableColors}
+              availableSizes={availableSizes}
+            />
           </aside>
 
           {/* Product Grid */}
           <section>
             {groupedProducts.length === 0 ? (
               <div className="py-20 text-center border border-dashed border-[#362222] rounded-lg">
-                <p className="text-gray-400 text-xl font-light">No products match your filters. Try clearing some options.</p>
-                <a href={`/shop/${categorySlug}`} className="text-[#8B4513] hover:text-white mt-4 inline-block font-bold uppercase tracking-wider text-sm transition-colors">
+                <p className="text-gray-400 text-xl font-light">
+                  No products match your filters. Try clearing some options.
+                </p>
+                <a
+                  href={`/shop/${categorySlug}`}
+                  className="text-[#8B4513] hover:text-white mt-4 inline-block font-bold uppercase tracking-wider text-sm transition-colors"
+                >
                   Clear all filters
                 </a>
               </div>
@@ -98,12 +108,17 @@ export default async function CategoryPage(props: Props) {
               <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-x-8 gap-y-16">
                 {groupedProducts.map((product) => {
                   // Use aggregated fields from the GroupedProductCard
-                  const href = `/shop/${encodeURIComponent(categorySlug)}/${encodeURIComponent(product.groupSlug ?? '')}?sku=${encodeURIComponent(product.sampleSku ?? '')}`;
+                  const href = `/shop/${encodeURIComponent(
+                    categorySlug
+                  )}/${encodeURIComponent(
+                    product.groupSlug ?? ""
+                  )}?sku=${encodeURIComponent(product.sampleSku ?? "")}`;
 
                   // Display logic for price range
-                  const priceDisplay = product.minPrice === product.maxPrice
-                    ? `$${product.minPrice}`
-                    : `$${product.minPrice} - $${product.maxPrice}`;
+                  const priceDisplay =
+                    product.minPrice === product.maxPrice
+                      ? `$${product.minPrice}`
+                      : `$${product.minPrice} - $${product.maxPrice}`;
 
                   return (
                     <Link
@@ -112,7 +127,7 @@ export default async function CategoryPage(props: Props) {
                       className="group block"
                     >
                       {/* Image Container */}
-                      <div className="relative aspect-[4/5] w-full overflow-hidden bg-[#201a1a] mb-4">
+                      <div className="relative aspect-4/5 w-full overflow-hidden bg-[#201a1a] mb-4">
                         {product.primaryImageUrl ? (
                           <Image
                             src={product.primaryImageUrl}
@@ -130,7 +145,9 @@ export default async function CategoryPage(props: Props) {
                         {/* Badges */}
                         {!product.anyInStock && (
                           <div className="absolute inset-0 bg-black/60 flex items-center justify-center backdrop-blur-sm">
-                            <span className="text-white font-bold tracking-widest border border-white px-4 py-2">SOLD OUT</span>
+                            <span className="text-white font-bold tracking-widest border border-white px-4 py-2">
+                              SOLD OUT
+                            </span>
                           </div>
                         )}
 
@@ -155,11 +172,16 @@ export default async function CategoryPage(props: Props) {
                           </span>
                         </div>
                         <div className="flex items-center gap-3 text-xs text-gray-500 font-mono uppercase">
-                          <span>{product.totalVariants} Variant{product.totalVariants !== 1 && 's'}</span>
+                          <span>
+                            {product.totalVariants} Variant
+                            {product.totalVariants !== 1 && "s"}
+                          </span>
                           {product.totalVariants > 1 && (
                             <>
                               <span>/</span>
-                              <span className="text-[#64421d]">Multiple Options</span>
+                              <span className="text-[#64421d]">
+                                Multiple Options
+                              </span>
                             </>
                           )}
                         </div>

@@ -130,7 +130,19 @@ export const userService = {
             console.error('Delete account error:', error);
             return { error: error.message || 'Failed to delete account', status: 500 };
         }
-    }
+    },
 
+    // Get users order history by email
+    async getOrderHistory(email: string): Promise<ApiResponse<any[]>> {
+        try {
+            console.log('Fetching order history for email:', email);
+            if (!email) {
+                return { error: 'Email is required to fetch order history', status: 400 };
+            }
+            return await apiClient.get<any[]>(`/api/Orders/by-email/${encodeURIComponent(email)}`);
+        } catch (error: any) {
+            return { error: error.message || 'Failed to get order history', status: 500 };
+        }
+    }
 
 };

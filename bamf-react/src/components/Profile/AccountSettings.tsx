@@ -11,7 +11,7 @@ const AccountSettings = ({
   email: string;
   setEmail: (v: string) => void;
 }) => {
-  const { refreshUser, login } = useAuth();
+  const { login } = useAuth();
   const [isEditingEmail, setIsEditingEmail] = useState(false);
   const [isEditingPassword, setIsEditingPassword] = useState(false);
   const [newEmail, setNewEmail] = useState("");
@@ -48,10 +48,8 @@ const AccountSettings = ({
       return;
     }
 
-    // Re-login with new email to get updated token, workaround for backend limitations, sorry folks :)
     const loginResponse = await login(newEmail, currentPasswordForEmail);
 
-    // Handle login failure
     if (!loginResponse.success) {
       toast.warning(
         "Email updated but auto-login failed. Please log in manually with your new email."
@@ -78,7 +76,6 @@ const AccountSettings = ({
 
     setIsLoading(true);
 
-    // Update profile with new password
     const response = await userService.updateProfile({
       email: email,
       currentPassword,
@@ -99,32 +96,37 @@ const AccountSettings = ({
   };
 
   return (
-    <div className="rounded-xl p-10 mb-10 bg-[#2B2B2B] border border-[#3a3a3a]">
-      <div className="flex items-center mb-10">
-        <div className="w-20 h-20 rounded-full flex items-center justify-center mr-5 bg-[#362222] ring-2 ring-[#4a3535]">
-          <User className="w-10 h-10 text-gray-200" strokeWidth={2.5} />
+    <div className="p-4 md:p-10 bg-[#2B2B2B] border border-[#423F3E]">
+      <div className="flex items-center mb-6 md:mb-10">
+        <div className="w-12 h-12 md:w-16 md:h-16 flex items-center justify-center mr-4 md:mr-6 border-2 border-[#423F3E] bg-[#171010]">
+          <User
+            className="w-6 h-6 md:w-8 md:h-8 text-gray-200"
+            strokeWidth={2}
+          />
         </div>
         <div>
-          <h2 className="text-3xl font-bold text-white tracking-tight">
+          <h2 className="text-xl md:text-3xl font-bold text-white tracking-tight">
             Account Settings
           </h2>
-          <p className="text-gray-400 mt-1">Manage your login credentials</p>
+          <p className="text-sm md:text-base text-gray-400 mt-1">
+            Manage your login credentials
+          </p>
         </div>
       </div>
 
       <div className="space-y-8">
         {/* Email Section */}
         <div>
-          <label className="block text-sm font-bold text-gray-300 mb-3 uppercase tracking-wide">
+          <label className="block text-sm font-bold text-gray-300 mb-3 uppercase tracking-widest">
             Email Address
           </label>
           {!isEditingEmail ? (
-            <div className="flex gap-3">
+            <div className="flex flex-col md:flex-row gap-4">
               <input
                 type="email"
                 value={email}
                 disabled
-                className="flex-1 px-5 py-3.5 rounded-lg text-white font-medium bg-[#423F3E] opacity-70 cursor-not-allowed"
+                className="flex-1 px-5 py-4 bg-[#171010] text-white placeholder-gray-600 border-2 border-[#423F3E] outline-none font-mono uppercase text-sm opacity-70 cursor-not-allowed"
               />
               <button
                 onClick={() => {
@@ -132,20 +134,20 @@ const AccountSettings = ({
                   setNewEmail(email);
                 }}
                 disabled={isLoading}
-                className="px-8 py-3.5 rounded-lg bg-[#362222] hover:bg-[#4a3535] text-white font-semibold transition-all hover:scale-105 active:scale-95 border border-[#4a3535] disabled:opacity-50 disabled:cursor-not-allowed"
+                className="px-8 py-4 text-white font-bold text-sm tracking-widest uppercase transition-colors hover:bg-white hover:text-black border-2 border-[#423F3E] disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 Edit
               </button>
             </div>
           ) : (
-            <div className="space-y-4">
+            <div className="space-y-4 p-6 border border-[#423F3E] bg-[#171010]">
               <input
                 type="email"
                 value={newEmail}
                 onChange={(e) => setNewEmail(e.target.value)}
                 disabled={isLoading}
-                placeholder="New email address"
-                className="w-full px-5 py-3.5 rounded-lg text-white font-medium bg-[#362222] border-2 border-[#4a3535] focus:outline-none focus:ring-2 focus:ring-[#ff4444] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                placeholder="NEW EMAIL ADDRESS"
+                className="w-full px-5 py-4 bg-[#0f0a0a] text-white placeholder-gray-600 border-2 border-[#423F3E] focus:border-[#8B4513] outline-none transition-colors font-mono uppercase text-sm disabled:opacity-50"
               />
               <div className="relative">
                 <input
@@ -153,8 +155,8 @@ const AccountSettings = ({
                   value={currentPasswordForEmail}
                   onChange={(e) => setCurrentPasswordForEmail(e.target.value)}
                   disabled={isLoading}
-                  placeholder="Current password (required)"
-                  className="w-full px-5 py-3.5 pr-12 rounded-lg text-white font-medium bg-[#362222] border-2 border-[#4a3535] focus:outline-none focus:ring-2 focus:ring-[#ff4444] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                  placeholder="CURRENT PASSWORD (REQUIRED)"
+                  className="w-full px-5 py-4 pr-12 bg-[#0f0a0a] text-white placeholder-gray-600 border-2 border-[#423F3E] focus:border-[#8B4513] outline-none transition-colors font-mono uppercase text-sm disabled:opacity-50"
                 />
                 <button
                   type="button"
@@ -163,11 +165,6 @@ const AccountSettings = ({
                   }
                   disabled={isLoading}
                   className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-200 transition-colors disabled:opacity-50"
-                  aria-label={
-                    showCurrentPasswordForEmail
-                      ? "Hide password"
-                      : "Show password"
-                  }
                 >
                   {showCurrentPasswordForEmail ? (
                     <EyeOff size={20} />
@@ -176,13 +173,13 @@ const AccountSettings = ({
                   )}
                 </button>
               </div>
-              <div className="flex gap-3">
+              <div className="flex gap-4 pt-2">
                 <button
                   onClick={handleSaveEmail}
                   disabled={isLoading}
-                  className="px-8 py-3.5 rounded-lg bg-[#ff4444] hover:bg-[#cc0000] text-white font-bold transition-all hover:scale-105 active:scale-95 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="px-8 py-4 text-white font-bold text-sm tracking-widest uppercase transition-all border-2 border-[#362222] hover:bg-[#8B4513] hover:border-[#8B4513] bg-[#362222] disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  {isLoading ? "Saving..." : "Save"}
+                  {isLoading ? "SAVING..." : "SAVE EMAIL"}
                 </button>
                 <button
                   onClick={() => {
@@ -190,7 +187,7 @@ const AccountSettings = ({
                     setCurrentPasswordForEmail("");
                   }}
                   disabled={isLoading}
-                  className="px-8 py-3.5 rounded-lg bg-[#423F3E] hover:bg-[#504d4c] text-gray-300 font-semibold transition-all hover:scale-105 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="px-8 py-4 text-white font-bold text-sm tracking-widest uppercase border-2 transition-colors hover:bg-white hover:text-black border-[#423F3E] disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   Cancel
                 </button>
@@ -201,36 +198,33 @@ const AccountSettings = ({
 
         {/* Password Section */}
         <div>
-          <label className="block text-sm font-bold text-gray-300 mb-3 uppercase tracking-wide">
+          <label className="block text-sm font-bold text-gray-300 mb-3 uppercase tracking-widest">
             Password
           </label>
           {!isEditingPassword ? (
             <button
               onClick={() => setIsEditingPassword(true)}
               disabled={isLoading}
-              className="px-8 py-3.5 rounded-lg bg-[#362222] hover:bg-[#4a3535] text-white font-semibold transition-all hover:scale-105 active:scale-95 border border-[#4a3535] disabled:opacity-50 disabled:cursor-not-allowed"
+              className="px-8 py-4 w-full text-white font-bold text-sm tracking-widest uppercase transition-colors hover:bg-white hover:text-black border-2 border-[#423F3E] disabled:opacity-50 disabled:cursor-not-allowed"
             >
               Change Password
             </button>
           ) : (
-            <div className="space-y-4">
+            <div className="space-y-4 p-6 border border-[#423F3E] bg-[#171010]">
               <div className="relative">
                 <input
                   type={showCurrentPassword ? "text" : "password"}
                   value={currentPassword}
                   onChange={(e) => setCurrentPassword(e.target.value)}
                   disabled={isLoading}
-                  placeholder="Current password"
-                  className="w-full px-5 py-3.5 pr-12 rounded-lg text-white font-medium bg-[#362222] border-2 border-[#4a3535] focus:outline-none focus:ring-2 focus:ring-[#ff4444] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                  placeholder="CURRENT PASSWORD"
+                  className="w-full px-5 py-4 pr-12 bg-[#0f0a0a] text-white placeholder-gray-600 border-2 border-[#423F3E] focus:border-[#8B4513] outline-none transition-colors font-mono uppercase text-sm disabled:opacity-50"
                 />
                 <button
                   type="button"
                   onClick={() => setShowCurrentPassword(!showCurrentPassword)}
                   disabled={isLoading}
                   className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-200 transition-colors disabled:opacity-50"
-                  aria-label={
-                    showCurrentPassword ? "Hide password" : "Show password"
-                  }
                 >
                   {showCurrentPassword ? (
                     <EyeOff size={20} />
@@ -245,28 +239,25 @@ const AccountSettings = ({
                   value={newPassword}
                   onChange={(e) => setNewPassword(e.target.value)}
                   disabled={isLoading}
-                  placeholder="New password (min. 8 characters)"
-                  className="w-full px-5 py-3.5 pr-12 rounded-lg text-white font-medium bg-[#362222] border-2 border-[#4a3535] focus:outline-none focus:ring-2 focus:ring-[#ff4444] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                  placeholder="NEW PASSWORD (MIN. 8 CHARACTERS)"
+                  className="w-full px-5 py-4 pr-12 bg-[#0f0a0a] text-white placeholder-gray-600 border-2 border-[#423F3E] focus:border-[#8B4513] outline-none transition-colors font-mono uppercase text-sm disabled:opacity-50"
                 />
                 <button
                   type="button"
                   onClick={() => setShowNewPassword(!showNewPassword)}
                   disabled={isLoading}
                   className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-200 transition-colors disabled:opacity-50"
-                  aria-label={
-                    showNewPassword ? "Hide password" : "Show password"
-                  }
                 >
                   {showNewPassword ? <EyeOff size={20} /> : <Eye size={20} />}
                 </button>
               </div>
-              <div className="flex gap-3 pt-2">
+              <div className="flex flex-col md:flex-row gap-4 pt-2">
                 <button
                   onClick={handleSavePassword}
                   disabled={isLoading}
-                  className="px-8 py-3.5 rounded-lg bg-[#ff4444] hover:bg-[#cc0000] text-white font-bold transition-all hover:scale-105 active:scale-95 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="px-8 py-4 text-white font-bold text-sm tracking-widest uppercase transition-all border-2 border-[#362222] hover:bg-[#8B4513] hover:border-[#8B4513] bg-[#362222] disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  {isLoading ? "Saving..." : "Save Password"}
+                  {isLoading ? "SAVING..." : "SAVE PASSWORD"}
                 </button>
                 <button
                   onClick={() => {
@@ -275,7 +266,7 @@ const AccountSettings = ({
                     setNewPassword("");
                   }}
                   disabled={isLoading}
-                  className="px-8 py-3.5 rounded-lg bg-[#423F3E] hover:bg-[#504d4c] text-gray-300 font-semibold transition-all hover:scale-105 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="px-8 py-4 text-white font-bold text-sm tracking-widest uppercase border-2 transition-colors hover:bg-white hover:text-black border-[#423F3E] disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   Cancel
                 </button>

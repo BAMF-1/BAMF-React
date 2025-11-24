@@ -90,7 +90,7 @@ export default function Navbar() {
     return (
         <>
             {/* The Unified Fixed Header: Z-index must be higher than StaggeredMenu (z-60 > z-40) */}
-            <header className="fixed top-0 left-0 w-full p-6 z-[60] flex items-center justify-between pointer-events-none">
+            <header className="fixed top-0 left-0 w-full p-6 z-60 flex items-center justify-between pointer-events-none">
 
                 {/* 1. Logo/Branding on the left */}
                 <Link className="flex items-center select-none pointer-events-auto hover:scale-101" href="/">
@@ -122,14 +122,14 @@ export default function Navbar() {
                         <span className="font-bold tracking-wider text-white">{menuOpen ? 'CLOSE' : 'MENU'}</span>
 
                         {/* Animated Cross Icon (Simple CSS transition for the plus sign) */}
-                        <span className="relative w-[14px] h-[14px] shrink-0 inline-flex items-center justify-center">
+                        <span className="relative w-3.5 h-3.5 shrink-0 inline-flex items-center justify-center">
                             {/* Horizontal Line */}
                             <span
-                                className={`text-white absolute left-1/2 top-1/2 w-full h-[2px] bg-current rounded-[2px] -translate-x-1/2 -translate-y-1/2 transition-transform duration-500 ease-out ${menuOpen ? 'rotate-45' : 'rotate-0'}`}
+                                className={`text-white absolute left-1/2 top-1/2 w-full h-0.5 bg-current rounded-xs -translate-x-1/2 -translate-y-1/2 transition-transform duration-500 ease-out ${menuOpen ? 'rotate-45' : 'rotate-0'}`}
                             />
                             {/* Vertical Line */}
                             <span
-                                className={`text-white absolute left-1/2 top-1/2 w-full h-[2px] bg-current rounded-[2px] -translate-x-1/2 -translate-y-1/2 transition-transform duration-500 ease-out ${menuOpen ? '-rotate-45' : 'rotate-90'}`}
+                                className={`text-white absolute left-1/2 top-1/2 w-full h-0.5 bg-current rounded-xs -translate-x-1/2 -translate-y-1/2 transition-transform duration-500 ease-out ${menuOpen ? '-rotate-45' : 'rotate-90'}`}
                             />
                         </span>
                     </button>
