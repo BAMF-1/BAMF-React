@@ -126,7 +126,7 @@ const AccountSettings = ({
                 type="email"
                 value={email}
                 disabled
-                className="flex-1 px-5 py-4 bg-[#171010] text-white placeholder-gray-600 border-2 border-[#423F3E] outline-none font-mono uppercase text-sm opacity-70 cursor-not-allowed"
+                className="flex-1 px-5 py-4 bg-[#171010] text-white placeholder-gray-600 border-2 border-[#423F3E] outline-none font-mono text-sm opacity-70 cursor-not-allowed"
               />
               <button
                 onClick={() => {
@@ -147,7 +147,7 @@ const AccountSettings = ({
                 onChange={(e) => setNewEmail(e.target.value)}
                 disabled={isLoading}
                 placeholder="NEW EMAIL ADDRESS"
-                className="w-full px-5 py-4 bg-[#0f0a0a] text-white placeholder-gray-600 border-2 border-[#423F3E] focus:border-[#8B4513] outline-none transition-colors font-mono uppercase text-sm disabled:opacity-50"
+                className="w-full px-5 py-4 bg-[#0f0a0a] text-white placeholder-gray-600 border-2 border-[#423F3E] focus:border-[#8B4513] outline-none transition-colors font-mono text-sm disabled:opacity-50"
               />
               <div className="relative">
                 <input
@@ -156,7 +156,7 @@ const AccountSettings = ({
                   onChange={(e) => setCurrentPasswordForEmail(e.target.value)}
                   disabled={isLoading}
                   placeholder="CURRENT PASSWORD (REQUIRED)"
-                  className="w-full px-5 py-4 pr-12 bg-[#0f0a0a] text-white placeholder-gray-600 border-2 border-[#423F3E] focus:border-[#8B4513] outline-none transition-colors font-mono uppercase text-sm disabled:opacity-50"
+                  className="w-full px-5 py-4 pr-12 bg-[#0f0a0a] text-white placeholder-gray-600 border-2 border-[#423F3E] focus:border-[#8B4513] outline-none transition-colors font-mono text-sm disabled:opacity-50"
                 />
                 <button
                   type="button"
@@ -218,7 +218,7 @@ const AccountSettings = ({
                   onChange={(e) => setCurrentPassword(e.target.value)}
                   disabled={isLoading}
                   placeholder="CURRENT PASSWORD"
-                  className="w-full px-5 py-4 pr-12 bg-[#0f0a0a] text-white placeholder-gray-600 border-2 border-[#423F3E] focus:border-[#8B4513] outline-none transition-colors font-mono uppercase text-sm disabled:opacity-50"
+                  className="w-full px-5 py-4 pr-12 bg-[#0f0a0a] text-white placeholder-gray-600 border-2 border-[#423F3E] focus:border-[#8B4513] outline-none transition-colors font-mono text-sm disabled:opacity-50"
                 />
                 <button
                   type="button"
@@ -240,7 +240,7 @@ const AccountSettings = ({
                   onChange={(e) => setNewPassword(e.target.value)}
                   disabled={isLoading}
                   placeholder="NEW PASSWORD (MIN. 8 CHARACTERS)"
-                  className="w-full px-5 py-4 pr-12 bg-[#0f0a0a] text-white placeholder-gray-600 border-2 border-[#423F3E] focus:border-[#8B4513] outline-none transition-colors font-mono uppercase text-sm disabled:opacity-50"
+                  className="w-full px-5 py-4 pr-12 bg-[#0f0a0a] text-white placeholder-gray-600 border-2 border-[#423F3E] focus:border-[#8B4513] outline-none transition-colors font-mono text-sm disabled:opacity-50"
                 />
                 <button
                   type="button"
