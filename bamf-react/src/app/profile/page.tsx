@@ -62,7 +62,7 @@ const ProfilePage = () => {
 
   return (
     <div
-      className="min-h-screen overflow-hidden"
+      className="min-h-screen min-w-8/10 overflow-hidden"
       style={{ backgroundColor: "#171010" }}
     >
       {/* Waves background */}
@@ -84,7 +84,7 @@ const ProfilePage = () => {
         </div>
         <div className=""></div>
         {/* Main Content */}
-        <div className="space-y-8 md:space-y-12 max-w-7xl mx-auto px-4 md:px-6 relative z-10">
+        <div className="space-y-8 md:space-y-12 max-w-7xl mx-auto px-4 md:px-6 relative z-10 min-w-7/10">
           <ProfileHeader />
           <AnimatedContent delay={0.2} distance={30}>
             <AccountSettings email={email} setEmail={setEmail} />
