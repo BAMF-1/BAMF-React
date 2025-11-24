@@ -29,7 +29,6 @@ export const metadata: Metadata = {
 // lets disable footer for specific pages like admin and checkout
 
 
-
 export default function RootLayout({
   children,
 }: Readonly<{
