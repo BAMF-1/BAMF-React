@@ -104,11 +104,11 @@ export default async function ProductPage({ params, searchParams }: Props) {
           />
         </div>
 
-        <div className="mt-8">
+        <div className="mt-8 border-t border-[#362222] pt-8">
           <CreateReviewSection groupSlug={group.groupSlug} />
         </div>
 
-        <div className="mt-4 pt-4 border-t border-[#362222]">
+        <div className="mt-8">
           <ProductReviews groupSlug={group.groupSlug} />
         </div>
 
