@@ -4,6 +4,7 @@ import StaggeredMenu, { StaggeredMenuItem, StaggeredMenuSocialItem } from "./Sta
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 
+
 // Define your menu items
 const menuItems: StaggeredMenuItem[] = [
     { label: "SHOP", ariaLabel: "Go to the Shop page", link: "/shop" },

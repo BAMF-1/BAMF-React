@@ -4,6 +4,7 @@ import { createPortal } from "react-dom";
 import { useCart } from "@/contexts/CartContext";
 import Image from "next/image";
 import { analytics } from "@/lib/analytics";
+import { useRouter } from "next/navigation";
 
 export default function CartDrawer({
   isOpen,
@@ -12,6 +13,7 @@ export default function CartDrawer({
   isOpen: boolean;
   onClose: () => void;
 }) {
+  const router = useRouter();
   const [mounted, setMounted] = useState(false);
   const {
     items,
@@ -48,26 +50,27 @@ export default function CartDrawer({
 
   if (!mounted) return null;
 
-
-  const handleCheckout = () => () => {
-    window.location.href = "/checkout";
-  }
+  const handleCheckout = () => {
+    router.push("/checkout");
+  };
 
   return createPortal(
     <>
       {/* Backdrop */}
       <div
-        className={`fixed inset-0 w-screen h-screen bg-black transition-opacity duration-300 z-[999] ${isOpen
+        className={`fixed inset-0 w-screen h-screen bg-black transition-opacity duration-300 z-999 ${
+          isOpen
             ? "opacity-50 pointer-events-auto"
             : "opacity-0 pointer-events-none"
-          }`}
+        }`}
         onClick={onClose}
       />
 
       {/* Desktop: Slide from right */}
       <div
-        className={`not-sm:hidden fixed top-0 right-0 h-screen w-full sm:w-96 shadow-2xl transform transition-transform duration-500 ease-[cubic-bezier(0.25,1,0.5,1)] z-[1000] ${isOpen ? "translate-x-0" : "translate-x-full"
-          }`}
+        className={`not-sm:hidden fixed top-0 right-0 h-screen w-full sm:w-96 shadow-2xl transform transition-transform duration-500 ease-[cubic-bezier(0.25,1,0.5,1)] z-1000 ${
+          isOpen ? "translate-x-0" : "translate-x-full"
+        }`}
         style={{
           backgroundColor: "#1a1a1a",
           borderLeft: "2px solid #362222",
@@ -138,7 +141,7 @@ export default function CartDrawer({
                       style={{ borderColor: "#362222" }}
                     >
                       {/* Image */}
-                      <div className="w-20 h-20 bg-gray-800 rounded flex-shrink-0 overflow-hidden">
+                      <div className="w-20 h-20 bg-gray-800 rounded shrink-0 overflow-hidden">
                         {item.image ? (
                           <Image
                             src={item.image}
@@ -272,7 +275,7 @@ export default function CartDrawer({
                 onMouseLeave={(e) =>
                   (e.currentTarget.style.backgroundColor = "#8B4545")
                 }
-                onClick={handleCheckout()}
+                onClick={handleCheckout}
               >
                 CHECKOUT
               </button>
@@ -283,8 +286,9 @@ export default function CartDrawer({
 
       {/* Mobile Bottom Sheet */}
       <div
-        className={`sm:hidden fixed bottom-0 left-0 right-0 w-full shadow-2xl transform transition-transform duration-500 ease-[cubic-bezier(0.25,1,0.5,1)] z-[1000] rounded-t-2xl ${isOpen ? "translate-y-0" : "translate-y-full"
-          }`}
+        className={`sm:hidden fixed bottom-0 left-0 right-0 w-full shadow-2xl transform transition-transform duration-500 ease-[cubic-bezier(0.25,1,0.5,1)] z-1000 rounded-t-2xl ${
+          isOpen ? "translate-y-0" : "translate-y-full"
+        }`}
         style={{
           backgroundColor: "#1a1a1a",
           borderTop: "2px solid #362222",
@@ -346,7 +350,7 @@ export default function CartDrawer({
                     className="flex gap-3 border-b pb-4"
                     style={{ borderColor: "#362222" }}
                   >
-                    <div className="w-16 h-16 bg-gray-800 rounded flex-shrink-0 overflow-hidden">
+                    <div className="w-16 h-16 bg-gray-800 rounded shrink-0 overflow-hidden">
                       {item.image ? (
                         <Image
                           src={item.image}
@@ -444,6 +448,7 @@ export default function CartDrawer({
               <button
                 className="cursor-pointer w-full py-3 text-white font-bold rounded transition-all duration-300 active:scale-95"
                 style={{ backgroundColor: "#8B4545" }}
+                onClick={handleCheckout}
               >
                 CHECKOUT
               </button>

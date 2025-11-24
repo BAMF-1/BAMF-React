@@ -1,5 +1,6 @@
 // services/user.service.ts
 import { apiClient, ApiResponse } from '@/lib/api-client';
+import { Order } from '@/lib/services/adminServices';
 import { User } from '@/types/api.types';
 
 export const userService = {
@@ -139,6 +140,15 @@ export const userService = {
         } catch (error: any) {
             return { error: error.message || 'Failed to get order history', status: 500 };
         }
-    }
+    },
 
+    // Checkout all items in cart
+
+    async checkoutCart(email: string, items: Array<{ sku: string; quantity: number }>): Promise<ApiResponse<Order>> {
+        try {
+            return await apiClient.post<Order>('/api/Orders', { email, items });
+        } catch (error: any) {
+            return { error: error.message || 'Failed to checkout cart', status: 500 };
+        }
+    }
 };

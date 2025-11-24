@@ -148,7 +148,7 @@ export default function AdminPanel() {
                                     }`}
                                 title={!isSidebarOpen ? item.label : undefined}
                             >
-                                <Icon className="w-5 h-5 flex-shrink-0" />
+                                <Icon className="w-5 h-5 shrink-0" />
                                 {isSidebarOpen && (
                                     <div className="text-left flex-1">
                                         <div className="font-medium">{item.label}</div>
