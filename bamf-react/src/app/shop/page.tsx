@@ -139,13 +139,9 @@ export default function ShopLanding() {
                 const href = `/shop/${encodeURIComponent(categorySlug)}/${encodeURIComponent(item.slug)}?sku=${encodeURIComponent(item.sku)}`;
 
                 return (
-                  <Link
-                    key={item.id}
-                    href={href}
-                    className="group block"
-                  >
+                  <Link key={item.id} href={href} className="group block">
                     {/* Image Container - Clean, no border */}
-                    <div className="relative aspect-[4/5] w-full overflow-hidden bg-[#201a1a] mb-6">
+                    <div className="relative aspect-4/5 w-full overflow-hidden bg-[#201a1a] mb-6">
                       {item.primaryImageUrl ? (
                         <Image
                           src={item.primaryImageUrl}
@@ -163,7 +159,9 @@ export default function ShopLanding() {
                       {/* Overlay Badges */}
                       {!item.inStock && (
                         <div className="absolute inset-0 bg-black/60 flex items-center justify-center backdrop-blur-sm">
-                          <span className="text-white font-bold tracking-widest border border-white px-4 py-2">SOLD OUT</span>
+                          <span className="text-white font-bold tracking-widest border border-white px-4 py-2">
+                            SOLD OUT
+                          </span>
                         </div>
                       )}
 
@@ -190,7 +188,9 @@ export default function ShopLanding() {
                         {item.moreVariantsCount > 0 && (
                           <>
                             <span>/</span>
-                            <span className="text-[#8B4513]">{item.moreVariantsCount} + Styles</span>
+                            <span className="text-[#8B4513]">
+                              {item.moreVariantsCount} + Styles
+                            </span>
                           </>
                         )}
                       </div>
